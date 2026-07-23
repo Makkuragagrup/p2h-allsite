@@ -2041,6 +2041,17 @@ async function submitForm() {
     return;
   }
 
+  // Validasi: Keterangan Pengecekan (ringkasan umum) wajib diisi
+  const keteranganEl = document.getElementById('f_keterangan');
+  if (!keteranganEl.value.trim()) {
+    toast('⚠ Keterangan Pengecekan wajib diisi', 'err');
+    keteranganEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    keteranganEl.style.boxShadow = '0 0 0 2px var(--nok)';
+    keteranganEl.focus();
+    setTimeout(() => keteranganEl.style.boxShadow = '', 2000);
+    return;
+  }
+
   const cfg = FORMS[currentForm];
   // Jam Selesai P2H & durasi dihitung otomatis dari waktu form dibuka s/d disimpan (tidak bisa diubah manual)
   stopP2HTimer();
