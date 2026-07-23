@@ -35,7 +35,7 @@
   --shadow-md:0 4px 12px rgba(0,0,0,.1);
 }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:14px; }
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:14px; overscroll-behavior-y:contain; }
 
 /* ── TOPBAR ── */
 #app { display:flex; flex-direction:column; height:100%; }
@@ -123,6 +123,21 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   align-items:center; gap:8px;
 }
 .offline-banner.show { display:flex; }
+
+/* ── UPDATE BANNER ── */
+.update-banner {
+  position:fixed; left:12px; right:12px; bottom:78px;
+  background:var(--text); color:#fff;
+  border-radius:12px; padding:12px 14px;
+  display:none; align-items:center; justify-content:space-between; gap:10px;
+  box-shadow:var(--shadow-md); z-index:200; font-size:13px; font-weight:600;
+}
+.update-banner.show { display:flex; }
+.update-banner button {
+  background:var(--accent); color:#fff; border:none; border-radius:8px;
+  padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;
+}
+.update-banner button:hover { background:var(--accent-dk); }
 
 /* ── HOME ── */
 .home-header {
@@ -579,6 +594,12 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
         <span class="sync-badge" id="syncBadge" style="display:none">0</span>
       </button>
     </div>
+  </div>
+
+  <!-- BANNER: UPDATE TERSEDIA -->
+  <div class="update-banner" id="updateBanner">
+    <span>🔄 Versi baru tersedia</span>
+    <button onclick="reloadForUpdate()">Muat Ulang</button>
   </div>
 
   <!-- PAGE: HOME -->
@@ -2103,6 +2124,74 @@ function confirmGoHome() {
 }
 
 // ══════════════════════════════════════════════════════════
+// PROTEKSI PULL-TO-REFRESH — cegah swipe layar ke bawah
+// (di posisi paling atas) tidak sengaja me-refresh & menghapus
+// isian form. Pakai modal "Tinggalkan Form?" yang sama seperti
+// tombol Kembali.
+// ══════════════════════════════════════════════════════════
+let _pullStartY = 0;
+let _pullActive = false;
+let _pullWarned = false;
+const PULL_REFRESH_THRESHOLD = 60; // px, jarak tarik sebelum dianggap "mau refresh"
+
+function setupPullToRefreshGuard() {
+  document.addEventListener('touchstart', (e) => {
+    const atTop = (document.scrollingElement ? document.scrollingElement.scrollTop : window.scrollY) <= 0;
+    _pullActive = atTop && e.touches.length === 1;
+    _pullWarned = false;
+    if (_pullActive) _pullStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!_pullActive || _pullWarned) return;
+    const dy = e.touches[0].clientY - _pullStartY;
+    if (dy <= 0) return; // bukan tarik ke bawah
+
+    if (isFormDirty()) {
+      // Selalu blok gesture refresh kalau ada isian yang belum tersimpan,
+      // supaya browser/webview tidak sempat reload sendiri.
+      e.preventDefault();
+      if (dy > PULL_REFRESH_THRESHOLD) {
+        _pullWarned = true;
+        _pullActive = false;
+        _pendingNavTarget = null; // konfirmasi ini untuk tetap di home, bukan pindah page tertentu
+        document.getElementById('confirmBack').classList.add('show');
+      }
+    }
+    // Kalau form tidak dirty, biarkan gesture native berjalan seperti biasa
+    // (tidak ada data yang bisa hilang).
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => { _pullActive = false; });
+}
+
+// Jaring pengaman terakhir: reload manual (F5), tombol refresh browser,
+// atau tutup tab/app saat form masih ada isian yang belum tersimpan.
+window.addEventListener('beforeunload', (e) => {
+  if (isFormDirty()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// BANNER "VERSI BARU TERSEDIA" — muncul kalau service worker
+// sudah narik versi index.html/sw.js baru di background dan siap
+// dipakai, tanpa langsung memaksa reload (yang bisa hapus isian form).
+// ══════════════════════════════════════════════════════════
+function showUpdateBanner() {
+  const el = document.getElementById('updateBanner');
+  if (el) el.classList.add('show');
+}
+function reloadForUpdate() {
+  if (isFormDirty()) {
+    const lanjut = confirm('Ada isian form yang belum tersimpan. Data akan hilang kalau reload sekarang.\n\nReload sekarang juga?');
+    if (!lanjut) return;
+  }
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════════
 // MODAL DETAIL HISTORY
 // ══════════════════════════════════════════════════════════
 async function openDetail(localId) {
@@ -2181,14 +2270,30 @@ function closeDetail(e) {
 // ══════════════════════════════════════════════════════════
 // RETRY SINGLE RECORD
 // ══════════════════════════════════════════════════════════
+// FIX: cegah klik ganda pada tombol Retry Sync — tanpa ini, user yang
+// mencet tombol berkali-kali (misal karena sinyal lambat) bisa memicu
+// beberapa fetch paralel untuk localId yang sama → data terkirim dobel
+// ke Google Sheets (baris duplikat).
+const _retryInFlight = new Set();
+
 async function retrySingle(localId) {
+  if (_retryInFlight.has(localId)) { toast('⏳ Sedang mencoba sync...', ''); return; }
   if (!GAS_URL) { toast('⚠ URL GAS belum diset', 'err'); return; }
-  const reachable = await isGASReachable();
-  if (!reachable) { toast('📡 GAS tidak bisa dijangkau', 'err'); return; }
-  const records = await dbGetAll('records');
-  const rec = records.find(r => r.localId === localId);
-  if (!rec) return;
-  toast('⏳ Mencoba sync...', '');
+  _retryInFlight.add(localId);
+  try {
+    const reachable = await isGASReachable();
+    if (!reachable) { toast('📡 GAS tidak bisa dijangkau', 'err'); return; }
+    const records = await dbGetAll('records');
+    const rec = records.find(r => r.localId === localId);
+    if (!rec) return;
+    toast('⏳ Mencoba sync...', '');
+    await retrySingleCore(rec, localId);
+  } finally {
+    _retryInFlight.delete(localId);
+  }
+}
+
+async function retrySingleCore(rec, localId) {
   try {
     const payload = buildPayload(rec);
     const ctrl = new AbortController();
@@ -2661,6 +2766,10 @@ function updateOnlineStatus() {
   setupPolling();
   setupVisibilitySync();
 
+  // Aktifkan proteksi pull-to-refresh (cegah swipe turun tidak sengaja
+  // menghapus isian form yang belum tersimpan)
+  setupPullToRefreshGuard();
+
   // FIX 3: Record berstatus 'error' bisa punya nextRetryAt yang dijadwalkan
   // jauh ke depan (sampai 1 jam) dari kegagalan SEBELUM backend GAS dibenahi.
   // Tanpa ini, record lama tetap nunggu jadwal basi walau backend sudah sehat.
@@ -2675,6 +2784,16 @@ function updateOnlineStatus() {
   // Daftarkan Service Worker (sw.js) supaya app shell ke-cache dan bisa
   // dibuka tanpa internet setelah pertama kali diakses online.
   if ('serviceWorker' in navigator) {
+    // Kalau sebelum register sudah ada controller aktif, berarti ini BUKAN
+    // instalasi pertama kali — controllerchange yang terjadi setelahnya
+    // berarti versi baru sudah siap dipakai, tampilkan banner update.
+    const hadController = !!navigator.serviceWorker.controller;
+    let _swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_swRefreshing) return;
+      _swRefreshing = true;
+      if (hadController) showUpdateBanner();
+    });
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
         .catch(err => console.log('[SW] Gagal daftar service worker:', err));
