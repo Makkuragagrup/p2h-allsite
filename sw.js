@@ -4,7 +4,7 @@
 // (sudah ditangani di index.html, bukan di sini). Request ke Google Apps
 // Script TIDAK di-cache — itu harus selalu request live ke jaringan.
 
-const CACHE_NAME = 'p2h-shell-v5'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+const CACHE_NAME = 'p2h-shell-v6'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
 const APP_SHELL = [
   './',
   './index.html',
