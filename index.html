@@ -63,10 +63,11 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   width:32px; height:32px;
   display:flex; align-items:center; justify-content:center;
   font-size:15px; cursor:pointer;
-  transition:border-color .15s, background .15s;
+  transition:border-color .15s, background .15s, transform .1s;
   flex-shrink:0;
 }
 .refresh-btn:hover  { border-color:var(--accent); background:var(--accent-lt); }
+.refresh-btn:active:not(:disabled) { transform:scale(0.9); background:var(--accent-lt); }
 .refresh-btn:disabled { opacity:.5; cursor:not-allowed; }
 .refresh-btn.spinning { animation:spin .8s linear infinite; }
 .sync-btn {
@@ -74,9 +75,10 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   border:none; border-radius:8px;
   padding:7px 12px; font-size:12px; font-weight:700;
   cursor:pointer; display:flex; align-items:center; gap:5px;
-  transition:background .15s;
+  transition:background .15s, transform .1s;
 }
 .sync-btn:hover  { background:var(--accent-dk); }
+.sync-btn:active:not(:disabled) { transform:scale(0.93); background:var(--accent-dk); }
 .sync-btn:disabled { opacity:.5; cursor:not-allowed; }
 .sync-badge {
   background:#fff; color:var(--accent);
@@ -104,8 +106,9 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   padding:8px 4px 10px; gap:3px;
   cursor:pointer; border:none; background:none;
   color:var(--muted); font-size:10px; font-weight:600;
-  transition:color .15s;
+  transition:color .15s, transform .1s;
 }
+.bnav-item:active { transform:scale(0.9); }
 .bnav-item.active { color:var(--accent); }
 .bnav-item svg { width:22px; height:22px; }
 .bnav-dot {
@@ -198,10 +201,11 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   background:var(--bg); border:1px solid var(--border);
   color:var(--text); border-radius:8px;
   padding:7px 12px; cursor:pointer; font-size:13px; font-weight:600;
-  transition:background .12s;
+  transition:background .12s, transform .1s;
   flex-shrink:0;
 }
 .back-btn:hover { background:var(--border); }
+.back-btn:active { transform:scale(0.94); background:var(--border); }
 .form-title-wrap .form-title { font-weight:800; font-size:15px; color:var(--text); }
 .form-title-wrap .form-sub   { font-size:11px; color:var(--muted); }
 
@@ -267,6 +271,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   cursor:pointer; transition:all .12s;
   text-align:center;
 }
+.toggle-btn:active { transform:scale(0.94); }
 .toggle-btn.ok  { background:var(--ok-lt);  border-color:var(--ok);  color:var(--ok); }
 .toggle-btn.nok { background:var(--nok-lt); border-color:var(--nok); color:var(--nok); }
 .chk-item.is-ok  { border-color:var(--ok); }
@@ -289,9 +294,10 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   padding:14px; font-size:15px; font-weight:800;
   cursor:pointer; margin-top:6px;
   display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:background .15s; letter-spacing:-0.2px;
+  transition:background .15s, transform .1s; letter-spacing:-0.2px;
 }
 .submit-btn:hover:not(:disabled) { background:var(--accent-dk); }
+.submit-btn:active:not(:disabled) { transform:scale(0.96); background:var(--accent-dk); }
 .submit-btn:disabled { opacity:.5; cursor:not-allowed; }
 
 /* ── HISTORY ── */
@@ -464,6 +470,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   z-index:999; opacity:0; transition:opacity .25s;
   white-space:nowrap; max-width:88vw; text-align:center;
   box-shadow:var(--shadow-md);
+  pointer-events:none;
 }
 #toast.show { opacity:1; }
 #toast.ok-toast  { background:var(--ok); }
@@ -2049,6 +2056,17 @@ async function submitForm() {
     keteranganEl.style.boxShadow = '0 0 0 2px var(--nok)';
     keteranganEl.focus();
     setTimeout(() => keteranganEl.style.boxShadow = '', 2000);
+    return;
+  }
+
+  // Validasi: Tindakan wajib dipilih
+  const tindakanEl = document.getElementById('f_tindakan');
+  if (!tindakanEl.value) {
+    toast('⚠ Tindakan wajib dipilih', 'err');
+    tindakanEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    tindakanEl.style.boxShadow = '0 0 0 2px var(--nok)';
+    tindakanEl.focus();
+    setTimeout(() => tindakanEl.style.boxShadow = '', 2000);
     return;
   }
 
