@@ -2135,8 +2135,17 @@ let _pullWarned = false;
 const PULL_REFRESH_THRESHOLD = 60; // px, jarak tarik sebelum dianggap "mau refresh"
 
 function setupPullToRefreshGuard() {
+  // PENTING: yang benar-benar scroll di app ini adalah .page.active
+  // (punya overflow-y:auto sendiri) — BUKAN document/body. Cek scrollTop
+  // ke elemen yang salah bikin app selalu mengira "posisi paling atas",
+  // jadi peringatan muncul di setiap tarikan, bukan cuma pas mentok atas.
+  function getScrollEl() {
+    return document.querySelector('.page.active') || document.scrollingElement || document.documentElement;
+  }
+
   document.addEventListener('touchstart', (e) => {
-    const atTop = (document.scrollingElement ? document.scrollingElement.scrollTop : window.scrollY) <= 0;
+    const scrollEl = getScrollEl();
+    const atTop = scrollEl.scrollTop <= 0;
     _pullActive = atTop && e.touches.length === 1;
     _pullWarned = false;
     if (_pullActive) _pullStartY = e.touches[0].clientY;
@@ -2144,6 +2153,9 @@ function setupPullToRefreshGuard() {
 
   document.addEventListener('touchmove', (e) => {
     if (!_pullActive || _pullWarned) return;
+    // Batalkan kalau ternyata sudah scroll turun dari posisi awal
+    // (berarti ini scroll konten biasa, bukan pull-to-refresh)
+    if (getScrollEl().scrollTop > 0) { _pullActive = false; return; }
     const dy = e.touches[0].clientY - _pullStartY;
     if (dy <= 0) return; // bukan tarik ke bawah
 
