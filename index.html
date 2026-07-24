@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json"/>
 <link rel="icon" href="favicon-32.png"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
-<title>P2H MAKKURAGA GRUP - Site Torete, Buleleng &amp; Laronai</title>
+<title>P2H MAKKURAGA GRUP - Site Torete, Buleleng &amp; Laroenai</title>
 <style>
 :root {
   --white:    #ffffff;
@@ -85,6 +85,13 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   border-radius:20px; padding:1px 6px;
   font-size:10px; font-weight:800;
   min-width:16px; text-align:center;
+}
+.bnav-badge {
+  position:absolute; top:2px; right:calc(50% - 22px);
+  background:var(--nok); color:#fff;
+  border-radius:20px; padding:1px 5px;
+  font-size:9px; font-weight:800;
+  min-width:14px; text-align:center; line-height:1.3;
 }
 
 /* ── PAGES ── */
@@ -161,6 +168,32 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
 .stat-box .lbl { font-size:10px; color:var(--muted); margin-top:4px; line-height:1.3; }
 
 .section-header { padding:16px 16px 8px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
+
+.apv-lok-h {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 12px; margin:10px 2px 0; cursor:pointer; user-select:none;
+  background:var(--white); border:1.5px solid var(--border); border-radius:12px;
+  font-size:12px; font-weight:800; color:var(--accent);
+}
+.apv-lok-h .chev { transition:transform .15s; color:var(--muted); font-size:12px; }
+.apv-lok-h.open .chev { transform:rotate(90deg); }
+.apv-lok-body { display:none; padding:0 2px; }
+.apv-lok-body.open { display:block; }
+
+.apv-pen-h {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 12px 11px 22px; margin:8px 2px 0; cursor:pointer; user-select:none;
+  background:var(--bg); border:1px solid var(--border); border-radius:10px;
+  font-size:14px; font-weight:800; color:var(--text2);
+}
+.apv-pen-h .chev { transition:transform .15s; color:var(--muted); font-size:13px; }
+.apv-pen-h.open .chev { transform:rotate(90deg); }
+.apv-pen-body { display:none; padding:4px 0 2px; }
+.apv-pen-body.open { display:block; }
+.apv-type-h {
+  padding:8px 10px 4px 30px; font-size:10px; font-weight:800; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.6px;
+}
 
 .unit-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px 16px; }
 .unit-card {
@@ -329,6 +362,13 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
 .hist-item-info { flex:1; min-width:0; }
 .hist-item-info .unit { font-weight:700; font-size:13px; color:var(--text); }
 .hist-item-info .meta { font-size:11px; color:var(--muted); margin-top:2px; }
+.hist-item-info .meta-nama { font-size:13px; font-weight:600; color:var(--text); margin-top:4px; }
+.apv-tab-btn {
+  flex:1; background:var(--white); border:1.5px solid var(--border);
+  border-radius:9px; padding:9px 8px; font-size:12px; font-weight:700;
+  color:var(--text2); cursor:pointer; transition:border-color .15s, background .15s, color .15s;
+}
+.apv-tab-btn.active { border-color:var(--accent); background:var(--accent-lt); color:var(--accent-dk); }
 .hist-status { font-size:10px; font-weight:700; margin-top:5px; display:inline-block; border-radius:20px; padding:2px 8px; }
 .hist-status.synced  { background:var(--ok-lt);  color:var(--ok); }
 .hist-status.pending { background:var(--accent-lt); color:var(--accent); }
@@ -433,6 +473,34 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   cursor:pointer; margin-top:8px; display:inline-flex; align-items:center; gap:5px;
 }
 .retry-btn:active { background:var(--accent); color:#fff; }
+
+/* ── AREA CETAK / DOWNLOAD PDF (Rekap Harian) ── */
+#printReportArea { display:none; }
+.print-report-title { font-size:16px; font-weight:800; color:#000; margin-bottom:2px; }
+.print-report-sub   { font-size:11px; color:#444; margin-bottom:14px; }
+.print-lokasi-h  { font-size:13px; font-weight:800; color:#000; margin:16px 0 4px; border-bottom:2px solid #000; padding-bottom:3px; }
+.print-penyewa-h { font-size:11px; font-weight:700; color:#333; margin:10px 0 4px 6px; }
+.print-category-h { font-size:17px; font-weight:800; color:#000; background:none; margin:22px 0 8px; padding:0 0 5px; border-bottom:2px solid #000; }
+.print-unit-row  { font-size:11px; padding:3px 0 3px 14px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; }
+.print-unit-row .st-ok  { color:#16a34a; font-weight:700; }
+.print-unit-row .st-nok { color:#dc2626; font-weight:700; }
+.print-report-summary { font-size:11px; margin:6px 0 4px 6px; color:#333; }
+.print-unit-wrap { border-bottom:1px solid #ddd; padding:5px 0; }
+.print-unit-wrap .print-unit-row { border-bottom:none; padding:0 0 0 14px; }
+.print-unit-detail { font-size:10px; font-weight:700; color:#b91c1c; padding:4px 0 0 28px; }
+.print-rusak-list { list-style:disc; margin:2px 0 0; padding:0 10px 0 46px; }
+.print-rusak-list li { font-size:10px; color:#7f1d1d; line-height:1.5; }
+.print-rusak-list li i { color:#57534e; font-style:italic; }
+.print-unit-note { font-size:10px; color:#57534e; padding:3px 10px 0 28px; }
+.print-unit-note i { font-style:italic; }
+@media print {
+  .print-category-h { break-before:page; }
+  .print-category-h.first { break-before:auto; }
+}
+@media print {
+  body > *:not(#printReportArea) { display:none !important; }
+  #printReportArea { display:block !important; padding:10px; }
+}
 
 /* ── CONFIRM DIALOG ── */
 .confirm-overlay {
@@ -589,7 +657,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
       <div class="topbar-logo" style="background:none;padding:0;overflow:hidden;"><img src="data:image/png;base64,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" style="width:36px;height:36px;border-radius:9px;display:block;object-fit:cover;"/></div>
       <div class="topbar-text">
         <div class="brand">P2H MAKKURAGA GRUP</div>
-        <div class="sub">Site Torete, Buleleng &amp; Laronai</div>
+        <div class="sub">Site Torete, Buleleng &amp; Laroenai</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -739,6 +807,15 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
     </div>
   </div>
 
+  <!-- PAGE: APPROVE -->
+  <div class="page" id="page-approve">
+    <div class="home-header">
+      <h1>Approve P2H</h1>
+      <p>Untuk Mekanik, Pengawas, dan HSE</p>
+    </div>
+    <div class="settings-body" id="approveBody"></div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <button class="bnav-item active" id="nav-home" onclick="safeShowPage('home')">
@@ -748,6 +825,11 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
     <button class="bnav-item" id="nav-history" onclick="safeShowPage('history')" style="position:relative">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       Riwayat
+    </button>
+    <button class="bnav-item" id="nav-approve" onclick="safeShowPage('approve')" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Approve
+      <span class="bnav-badge" id="approveBadge" style="display:none">0</span>
     </button>
     <button class="bnav-item" id="nav-settings" onclick="safeShowPage('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -775,6 +857,19 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
     <div class="confirm-btns">
       <button class="confirm-cancel" onclick="closeConfirmBack()">Batal</button>
       <button class="confirm-ok" onclick="confirmGoHome()">Ya, Kembali</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KONFIRMASI APPROVE -->
+<div class="confirm-overlay" id="confirmApproveModal">
+  <div class="confirm-box" style="max-width:320px">
+    <div class="icon">✅</div>
+    <h4>Konfirmasi Approve</h4>
+    <p id="confirmApproveText">Approve P2H ini?</p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirmApprove()">Batal</button>
+      <button class="confirm-ok" onclick="doApprove()">Ya, Approve</button>
     </div>
   </div>
 </div>
@@ -855,6 +950,29 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
 
 
 <div id="toast"></div>
+
+<!-- MODAL PILIH PIHAK PENYEWA UNTUK DOWNLOAD PDF REKAP HARIAN -->
+<div class="confirm-overlay" id="pdfPenyewaModal">
+  <div class="confirm-box" style="max-width:320px">
+    <div class="icon">📄</div>
+    <h4>Download PDF Rekap Harian</h4>
+    <p style="margin-bottom:10px">Pilih pihak penyewa yang mau dicetak:</p>
+    <select id="pdfPenyewaSelect" style="width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--white);margin-bottom:14px">
+      <option value="tas_aas">PT. TAS + PT. AAS</option>
+      <option value="mahligai">MAHLIGAI</option>
+      <option value="nec">PT. NEC</option>
+    </select>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="confirm-ok" style="background:var(--accent)" onclick="downloadRekapForSelectedPenyewa()">⬇️ Download</button>
+      <button class="confirm-cancel" onclick="closePdfPenyewaModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- AREA CETAK — disembunyikan di layar biasa, cuma tampil saat mode print
+     (lihat @media print di <style>). Diisi oleh generateRekapPDF() sebelum
+     window.print() dipanggil. -->
+<div id="printReportArea"></div>
 
 <script>
 // ══════════════════════════════════════════════════════════
@@ -1048,12 +1166,170 @@ const FORMS = {
   }
 };
 
-// ── LOKASI SITE & PIHAK PENYEWA ──
+// ── LABEL SINGKAT ITEM CHECKLIST ──
+// Dipakai KHUSUS oleh Rekap Harian > Download PDF supaya daftar item Rusak
+// tidak menampilkan kalimat panjang aslinya (mis. "Lakukan Pengecekan Level
+// dan Kondisi Oli Mesin, Pastikan Sesuai Standar dan Tidak Berkurang"),
+// melainkan nama komponen singkatnya saja (mis. "oli mesin"). Tidak
+// mempengaruhi tampilan form pengisian P2H maupun modal detail approve —
+// di sana kalimat lengkapnya tetap dipakai apa adanya.
+const SHORT_ITEM_LABELS = {
+  dt: {
+    'Pemeriksaan Level Air Radiator dan Kondisi Sistem Pendingin (Tidak Bocor / Cukup Level)': 'air radiator',
+    'Pemeriksaan Level dan Kondisi Oli Mesin Sesuai Standar Dipstick': 'oli mesin',
+    'Pemeriksaaan Minyak Kopling': 'minyak kopling',
+    'Pemeriksaan Fungsi Kemudi dan Level Oli Power Steering': 'oli power steering',
+    'Pemeriksaan Kekencangan Baut Roda, Tekanan, Keausan, dan Kondisi Fisik Ban (Tidak Sobek / Benjol) Terutama No 1 dan 2': 'ban & baut roda',
+    'Pemeriksaan Kondisi Rangka Utama (Chassis) dan Body Unit Dari Retak, Deformasi, atau Baut Kendur': 'chassis / body',
+    'Pemeriksaan Torque rod, U-bolt, Cross Joint, Bearing, dan Propeller Shaft dalam Kondisi Aman, Tidak Aus, dan Tidak Longgar': 'propeller shaft',
+    'Pemeriksaan Level Solar dan Kondisi Tangki': 'solar & tangki',
+    'Pemeriksaan Kondisi Selang Hidrolik (Tidak Retak, Bocor, atau Rembes)': 'selang hidrolik',
+    'Pemeriksaan Kondisi Bak Dump (Tidak Retak, Pin dan Silinder Dalam Kondisi Aman)': 'bak dump',
+    'Pemeriksaan Kondisi Aki dan Level Air Aki (Terminal Tidak Korosi)': 'aki',
+    'Pemeriksaan Fungsi dan Kebocoran Exhaust Brake': 'exhaust brake',
+    'Pemeriksaan Kondisi dan Posisi Kaca Spion': 'kaca spion',
+    'Pemeriksaan Kebersihan Kabin': 'kebersihan kabin',
+    'Pemeriksaan Fungsi Wiper dan Ketersediaan Air Washer': 'wiper',
+    'Pemeriksaan Kondisi Kursi dan Fungsi Sabuk Pengaman': 'kursi & sabuk pengaman',
+    'Pemeriksaan Visual Kondisi Mesin (Tidak Ada Kebocoran Oli, Suara Abnormal, Atau Getaran Tidak Normal)': 'kondisi mesin',
+    'Pemeriksaan Fungsi Indikator Ampere, Speedometer, Tekanan Oli dan Suhu Mesin': 'indikator panel',
+    'Pemeriksaan Fungsi Klakson': 'klakson',
+    'Pemeriksaan Fungsi Seluruh Lampu Unit (Lampu Utama, Lampu Rem, dan Lampu Sein) Dalam Kondisi Normal dan Berfungsi Baik': 'lampu unit',
+    'Pemeriksaan Fungsi Rem Utama dan Rem Parkir (Responsif & Tidak Blong)': 'rem utama / parkir',
+    'Back Alarm': 'back alarm',
+    'APAR': 'apar',
+    'Kotak P3K': 'kotak p3k',
+    'Lampu Rotari': 'lampu rotari'
+  },
+  exa: {
+    'Lakukan Pengecekan Level dan Kondisi Oli Mesin, Pastikan Sesuai Standar dan Tidak Berkurang': 'oli mesin',
+    'Cek Level Oli Hydraulic': 'oli hydraulic',
+    'Periksa Level Oli Swing Gear dan Pastikan Tidak Ada Kebocoran Pada Housing': 'oli swing gear',
+    'Periksa Level Bahan Bakar Solar dan Pastikan Cukup Untuk Operasional': 'solar',
+    'Periksa Volume Air Radiator dan Pastikan Tidak Kurang Atau Bocor': 'air radiator',
+    'Cek dan Bersihkan Pre Cleaner': 'pre cleaner',
+    'Periksa Kondisi Monitor Panel dan Pastikan Semua Indikator Berfungsi Normal': 'monitor panel',
+    'Periksa Kondisi Swing Gear Dari Keausan dan Pastikan Pelumasan Cukup': 'swing gear',
+    'Periksa Seluruh Bagian Unit Dari Kemungkinan Kebocoran Oli, Solar, atau Cairan Lainnya': 'kebocoran oli / solar',
+    'Periksa Kondisi Vbelt Dari Kelonggaran, Retak, atau Keausan': 'vbelt',
+    'Pastikan Semua Baut, Mur, dan Pin Dalam Kondisi Kencang dan Tidak Hilang': 'baut / mur / pin',
+    'Periksa Kondisi Batrai Dan Level Air Batrai, Pastikan Terminal Tidak Kendor Atau Berkarat': 'aki / baterai',
+    'Periksa Hos Hydraulic Dari Retak, Bocor, atau Rembesan Oli': 'hos hydraulic',
+    'Pastikan Kabin Bersih, Kaca Utuh, dan Semua Kontrol Dalam Kondisi Baik': 'kabin & kaca',
+    'Check Ketegangan & Kerusakan Pada Track Shoe / Link, Adjust Jika Diperlukan': 'track shoe / link',
+    'Check Keausan & Kerusakan Sproket, Baut dan Check Kebocoran Oli Final Drive': 'sproket / final drive',
+    'Check Keausan & Kerusakan Pada Idler': 'idler',
+    'Check Crack & Kerusakan Pada Frame': 'frame',
+    'Check Keausan & Kerusakan Pada Carrier & Track Roller': 'carrier / track roller',
+    'Check Pelumasan Boom Pin, Cylinder & Hose': 'boom pin / cylinder',
+    'Check Pelumasan Pin Arm, Cylinder & Hose': 'arm pin / cylinder',
+    'Check Teeth Bucket, Pelumasan Pada Pin, Link, Cylinders & Hose': 'teeth bucket',
+    'Pastikan Kursi dan Sabuk Pengaman Dalam Kondisi Baik dan Dapat Digunakan Dengan Aman': 'kursi & sabuk pengaman',
+    'Pastikan Lampu Indikator Tekanan Oli Mesin Tidak Menyala': 'indikator oli mesin',
+    'Pastikan Suhu Mesin Stabil dan Tidak Melebihi Batas Normal': 'suhu mesin',
+    'Pastikan Panel Suhu Hydraulic Stabil dan Tidak Melebihi Batas Normal': 'suhu hydraulic',
+    'Fungsi Hydraulic Lock': 'hydraulic lock',
+    'Pastikan Klakson Berbunyi Normal dan Jelas': 'klakson',
+    'Pastikan Seluruh Tombol Dan Indikator Panel Bekerja Dengan Baik': 'tombol & indikator',
+    'Uji Gerakan Hidrolik, Pastikan Respons Normal dan Tidak Tersendat': 'gerakan hidrolik',
+    'Periksa Seluruh Lampu Kerja Menyala': 'lampu kerja',
+    'Periksa Fungsi Gerakan Bucket dan Pastikan Tidak Macet Atau Oblak': 'gerakan bucket',
+    'Pastikan Boom Bergerak Lancar Tanpa Suara Abnormal': 'gerakan boom',
+    'Pastikan Kaca Spion Utuh Dan Posisi Sesuai Untuk Visibilitas Aman': 'kaca spion',
+    'Pastikan Back Alarm Berbunyi Saat Unit Berjalan': 'back alarm',
+    'Periksa Kondisi APAR, Tekanan Normal dan Segel Tidak Rusak': 'apar',
+    'Pastikan Kunci Kabin Berfungsi dan Dapat Mengunci Dengan Baik': 'kunci kabin',
+    'Periksa Kelengkapan Isi Kotak P3K dan Pastikan Masih Layak Pakai': 'kotak p3k',
+    'Pastikan Lampu Rotary Menyala Dengan Baik Sebagai Tanda Peringatan': 'lampu rotari',
+    'Periksa Kondisi Radio Rig Dan Pastikan Berfungsi Dengan Baik': 'radio rig'
+  },
+  gdv: {
+    'Periksa Kondisi Ban (Termasuk Lengkap & Kencangnya Bolt)': 'ban & baut roda',
+    'Periksa Kondisi Tandem & Final Drive (Tidak Ada Oil Leak)': 'tandem / final drive',
+    'Periksa Kondisi Sekitar Engine (Kebocoran Oil & Fuel Dll)': 'kebocoran engine',
+    'Periksa Kondisi Steering & Brake System (Tidak Ada Oil Leak)': 'steering & brake',
+    'Periksa Kondisi Hose Di Hydraulik System (Tidak Ada Oil Leak)': 'hose hydraulic',
+    'Periksa Kondisi Fisik Cabin (Termasuk Kaca)': 'cabin & kaca',
+    'Periksa Kondisi Kaca Spion (Harus Lengkap & Baik)': 'kaca spion',
+    'Periksa Kondisi Operator Seat (Harus Bisa Diadjust)': 'kursi operator',
+    'Periksa Kondisi Sabuk Pengaman': 'sabuk pengaman',
+    'Periksa Kondisi Tabung APAR': 'apar',
+    'Periksa Kondisi Electrical Wiring (Tidak Ada yang Shortage)': 'kabel elektrikal',
+    'Periksa Battery Isolator Switch , Switch Isolasi Lock Out': 'battery isolator switch',
+    'Periksa Kondisi Radio Komunikasi': 'radio komunikasi',
+    'Periksa Kondisi Lampu Kerja & Lampu Rotari': 'lampu kerja / rotari',
+    'Periksa Kondisi Di Sekitar Battery (Tidak Boleh Ada Kotoran)': 'kebersihan battery',
+    'Periksa Kondisi Blade & Scarifier / Ripper': 'blade / scarifier / ripper',
+    'SIMPER': 'simper',
+    'Periksa Level Air Pendingin di Reservoir Tank': 'air radiator',
+    'Periksa Level Oli Mesin di Engine Oil Pan': 'oli mesin',
+    'Periksa Level Fuel': 'solar / fuel',
+    'Periksa Level Oli Transmission': 'oli transmisi',
+    'Periksa Level Oli Hydraulic': 'oli hydraulic',
+    'Periksa Level Oli Steering & Brake System': 'oli steering / brake',
+    'Periksa Fungsi Klakson/ Horn': 'klakson',
+    'Periksa Tekanan Oli Mesin': 'tekanan oli mesin',
+    'Periksa Suhu Air Pendingin Mesin': 'suhu air pendingin',
+    'Periksa Suhu Oli Transmission/ T.Converter': 'suhu oli transmisi',
+    'Periksa Suhu Oil Hydraulik': 'suhu oli hydraulic',
+    'Periksa Fungsi Monitor Panel': 'monitor panel',
+    'Periksa Fungsi Semua Lampu Kerja Termasuk Rotary Lamp': 'lampu kerja / rotari',
+    'Periksa Fungsi Motor Wiper / Penghapus Kaca': 'wiper',
+    'Periksa Fungsi Back-Up Alarm': 'back alarm',
+    'Periksa Fungsi Work Equipment (Blade, Scarifier)': 'blade / scarifier',
+    'Periksa Fungsi Steering & Brake System': 'steering & brake',
+    'Periksa Fungsi Air Conditioning': 'ac'
+  },
+  lv: {
+    'Periksa Kondisi Ban dan Kekencangan Baut Roda': 'ban & baut roda',
+    'Periksa Level Oli Engine': 'oli mesin',
+    'Periksa Kerusakan Akibat Insiden': 'body / insiden',
+    'Periksa Level Oil Steering': 'oli steering',
+    'Periksa Level Oil Rem': 'oli rem',
+    'Pastikan Lampu Rotary Berfungsi': 'lampu rotari',
+    'Periksa Kondisi dan Pemasangan Buggy Whip': 'buggy whip',
+    'Pastikan Alarm Mundur Berfungsi': 'alarm mundur',
+    'Periksa Kondisi Battery dan Terminal': 'aki / battery',
+    'Periksa Ketersediaan Air Wiper': 'air wiper',
+    'Pastikan Unit Bersih': 'kebersihan unit',
+    'Pastikan Brake Berfungsi': 'rem',
+    'Pastikan Steering Berfungsi Normal': 'steering',
+    'Pastikan Seat Belt Berfungsi Baik': 'sabuk pengaman',
+    'Periksa Fungsi Double Gardan 4WD': 'double gardan 4wd',
+    'Periksa Kondisi Spion': 'kaca spion',
+    'Pastikan Klakson Berfungsi': 'klakson',
+    'Pastikan Radio Berfungsi': 'radio',
+    'Pastikan Lampu Parkir Berfungsi': 'lampu parkir',
+    'Pastikan Lampu Depan Berfungsi': 'lampu depan',
+    'Pastikan Lampu Jauh Berfungsi': 'lampu jauh',
+    'Pastikan Lampu Rem Berfungsi': 'lampu rem',
+    'Pastikan Lampu Hazard Berfungsi': 'lampu hazard',
+    'Pastikan Lampu Depan Kanan Berfungsi': 'lampu depan kanan',
+    'Pastikan Lampu Depan Kiri Berfungsi': 'lampu depan kiri',
+    'Pastikan Lampu Belakang Kanan Berfungsi': 'lampu belakang kanan',
+    'Pastikan Lampu Belakang Kiri Berfungsi': 'lampu belakang kiri',
+    'Periksa Fungsi Wiper': 'wiper',
+    'Pastikan APAR Tersedia dan Siap Digunakan': 'apar',
+    'Pastikan Kotak P3K Tersedia': 'kotak p3k',
+    'Pastikan Kunci Roda dan Dongkrak Tersedia': 'kunci roda / dongkrak',
+    'Periksa Kondisi dan Ketersediaan Traffic Cone.': 'traffic cone',
+    'Periksa kondisi dan ketersediaan Wheel Chock.': 'wheel chock'
+  }
+};
+
+// Ambil label singkat satu item checklist. Kalau item baru ditambah di
+// FORMS tapi belum sempat dipetakan di SHORT_ITEM_LABELS, fallback ke
+// kalimat aslinya dipotong 40 karakter (supaya tetap tampil, tidak error).
+function getShortItemLabel(unitType, fullText) {
+  const short = (SHORT_ITEM_LABELS[unitType] || {})[fullText];
+  if (short) return short;
+  return fullText.length > 40 ? fullText.slice(0, 40) + '…' : fullText;
+}
 // FALLBACK saja — dipakai kalau belum pernah berhasil sync Master Unit
 // (mis. pertama kali install & langsung offline). Begitu sync Master Unit
 // berhasil sekali, daftar ini ditimpa oleh kolom D/E sheet "Master Unit"
 // (lihat applyMasterUnit()) dan otomatis dipakai seterusnya.
-let LOKASI_OPTIONS = ['Buleleng', 'Torete', 'Laronai'];
+let LOKASI_OPTIONS = ['Buleleng', 'Torete', 'Laroenai'];
 let PENYEWA_OPTIONS = ['PT. TAS', 'PT. NEC', 'MAHLIGAI'];
 
 // Isi opsi Lokasi Site & Pihak Penyewa di select Profil Operator (settings)
@@ -1085,24 +1361,42 @@ populateOptionSelect('setup_penyewa', PENYEWA_OPTIONS);
 // Master Unit berhasil sekali, daftar ini akan ditimpa oleh data dari sheet
 // "Master Unit" dan otomatis dipakai untuk seterusnya (lihat applyMasterUnit()).
 let UNIT_OPTIONS = {
-  dt: ['DT 38 / 8138','DT 39 / 8139','DT 45 / 8141','DT 46 / 8145','DT 50 / 8140','DT 64 / 8134','DT 65 / 8142','DT 66 / 8136','DT 67 / 8143','DT 72 / 8137','DT 92 / 8108','DT 93 / 8109','DT 94 / 8111','DT 95 / 8112','DT 96 / 8113','DT 19 / 867','DT 43 / 863','DT 69 / 868','DT 76 / 872','DT 77 / 887','DT 80 / 864','DT 81 / 881','DT 82 / 882','DT 83 / 886','DT 85 / 880','DT 100 / 878','DT 101 / 873','DT HY 891','DT HY 892','DT HY 893','DT HY 894','DT HY 895','DT HY 896','DT HY 8103','DT HY 8106','DT HY 8107','DT SC 8120','DT SC 8121','DT SC 8122','DT SC 8123','DT SC 8125','DT SC 8126','DT SC 8127','DT SC 8128','DT SC 8129','DT SC 8130','DT SC 8131','DT SC 8132','DT SC 8133'],
-  exa: ['EX 20 / M 68','EX 45 / M 40','EX 49 / M 78','EX 50 / M 58','EX 38 / M 90','EX 21 / M 70','EX 64 / M 82','EX 24 / M 92','EX 40 / M 85','EX 51 / M 91','EX 44 / M 81','EX 52 / RR 54','EX 58 / RR 57','EX 54 / RR 55','EX 53 / RR 56','EX 43 / CAT 87','EX 57 / M 73','EX 23 / CAT 79','EX 18 / SANY 02','EX 56 / SANY 55','EX 46 / SANY 54','EX 47 / SANY 56','EX 25 / CAT 60','EX 19 / CAT 59','EX 37 / CAT 02','EX 55 / KOB 07','EX 42 / CAT 82','EX 59 / RR 53','EX 60 / YS 01','EX 48 / M 71','EX 22 / SUM 88','EX 41 / M 61'],
-  gdv: ['YS 02','M 412','SAKAY 421'],
-  lv: ['LV 07','LV 14','LV 17','LV 16','LV 08']
+  dt: ['DT 19 / 867','DT 38 / 8138','DT 39 / 8139','DT 43 / 863','DT 45 / 8141','DT 46 / 8145','DT 50 / 8135','DT 64 / 8140','DT 65 / 8142','DT 66 / 8136','DT 67 / 8143','DT 69 / 868','DT 72 / 8137','DT 76 / 872','DT 77 / 887','DT 80 / 864','DT 81 / 881','DT 82 / 882','DT 83 / 886','DT 85 / 880','DT 92 / 8108','DT 93 / 8109','DT 94 / 8111','DT 95 / 8112','DT 96 / 8113','DT 97 / 8118','DT 100 / 878','DT 101 / 873','DT 102 / 877','DT HY 888','DT HY 890','DT HY 891','DT HY 892','DT HY 893','DT HY 894','DT HY 895','DT HY 896','DT HY 897','DT HY 898','DT HY 899','DT HY 8100','DT HY 8102','DT HY 8103','DT HY 8104','DT HY 8105','DT HY 8106','DT HY 8107','DT SC 8120','DT SC 8121','DT SC 8122','DT SC 8123','DT SC 8125','DT SC 8126','DT SC 8127','DT SC 8128','DT SC 8129','DT SC 8130','DT SC 8131','DT SC 8132','DT SC 8133'],
+  exa: ['EX 18 / SANY 02','EX 19 / CAT 59','EX 20 / M 68','EX 21 / M 70','EX 22 / SUM 88','EX 23 / CAT 79','EX 24 / M 92','EX 25 / CAT 60','EX 37 / CAT 02','EX 38 / M 90','EX 40 / M 85','EX 41 / M 61','EX 42 / CAT 82','EX 43 / CAT 87','EX 44 / M 81','EX 45 / M 40','EX 46 / SANY 54','EX 47 / SANY 56','EX 48 / M 71','EX 49 / M 78','EX 50 / M 58','EX 51 / M 91','EX 52 / RR 54','EX 53 / RR 56','EX 54 / RR 55','EX 55 / CAT 61','EX 56 / SANY 55','EX 57 / M 73','EX 58 / RR 57','EX 59 / RR 53','EX 60 / YS 01','EX 64 / M 82','CAT M 01','M 06','KOB M 62','KOB M 76','CAT M 83','CAT M 84','CAT M 86','CAT M 87','CAT M 88','CAT M 89','CAT M 93','CAT M 94','CAT M 96','CAT M 98','CAT M 99','CAT M 100','MGA 819','MGA 827','MGA 830'],
+  gdv: ['YS 02','M 412','M 415','SAKAY 421'],
+  lv: ['LV 07','LV 08','LV 14','LV 16','LV 17','LV 18','LV 19','LV 21','LV 22']
 };
+
+// UNIT_META — per-unit Lokasi Site & Pihak Penyewa, { idUnit: {type, lokasi, penyewa} }.
+// Diisi dari field "unitMeta" hasil action=getMasterUnit (lihat catatan di
+// applyMasterUnit di bawah). KOSONG sampai backend Code.gs ditambah field
+// ini dan berhasil sync minimal sekali — dipakai oleh Rekap Harian > Download
+// PDF untuk mengelompokkan unit (termasuk yang BELUM P2H) per Lokasi/Penyewa.
+let UNIT_META = {};
 
 // ══════════════════════════════════════════════════════════
 // MASTER UNIT — sync daftar ID Unit dari Google Sheet "Master Unit"
 // ══════════════════════════════════════════════════════════
 // Backend (Code.gs) perlu route action=getMasterUnit yang membaca sheet
-// "Master Unit" (kolom: ID Unit, Jenis Unit) dan balas JSON:
-// { status:'ok', units: { dt:[...], exa:[...], gdv:[...], lv:[...] } }
-// Lihat catatan lengkap yang dikirim terpisah untuk kode Code.gs-nya.
+// "Master Unit" (kolom A/B: ID Unit, Jenis Unit; D/E: Lokasi Site, Pihak
+// Penyewa; G/H/I: sandi approval Mekanik/Pengawas/HSE) dan balas JSON:
+// { status:'ok', units:{dt:[...],exa:[...],gdv:[...],lv:[...]},
+//   unitMeta:{ 'DT 19 / 867': {type:'dt', lokasi:'...', penyewa:'...'}, ... },
+//   lokasi:[...], penyewa:[...],
+//   passwords:{ mekanik:'...', pengawas:'...', hse:'...' } }
+// unitMeta BARU (dipakai fitur Rekap Harian > Download PDF, untuk kelompokkan
+// unit per Lokasi Site & Pihak Penyewa termasuk yang BELUM P2H hari ini).
+// Kalau Code.gs belum mengirim field ini, fitur tetap jalan tapi unit yang
+// belum P2H hari ini masuk grup "Lokasi Belum Diketahui" di laporan PDF.
+// approveP2H() di backend WAJIB validasi terhadap sandi dari sheet yang
+// SAMA (bukan konstanta hardcoded), supaya edit sandi di sheet langsung
+// berlaku tanpa redeploy script. Lihat catatan lengkap yang dikirim
+// terpisah untuk kode Code.gs-nya.
 
 // Terapkan hasil dari sheet ke UNIT_OPTIONS yang dipakai form.
 // Hanya menimpa kalau datanya masuk akal (minimal ada 1 tipe berisi unit),
 // supaya respons kosong/aneh dari server tidak menghapus daftar yang sudah ada.
-function applyMasterUnit(units, lokasi, penyewa) {
+function applyMasterUnit(units, lokasi, penyewa, passwords, unitMeta) {
   if (!units || typeof units !== 'object') return false;
   const totalUnit = Object.values(units).reduce((n, arr) => n + (Array.isArray(arr) ? arr.length : 0), 0);
   if (totalUnit === 0) return false;
@@ -1112,6 +1406,22 @@ function applyMasterUnit(units, lokasi, penyewa) {
     gdv: Array.isArray(units.gdv) ? units.gdv : [],
     lv:  Array.isArray(units.lv)  ? units.lv  : []
   };
+
+  // Per-unit Lokasi Site / Pihak Penyewa — hanya timpa kalau backend
+  // benar-benar mengirim field ini (Code.gs versi lama belum punya).
+  if (unitMeta && typeof unitMeta === 'object') {
+    UNIT_META = unitMeta;
+  }
+
+  // Sandi approval dari kolom G/H/I sheet "Master Unit" (Mekanik/Pengawas/HSE).
+  // Timpa per-jabatan HANYA kalau nilainya ada isi, supaya kolom yang sengaja
+  // dikosongkan di sheet tidak mengunci approver keluar (fallback tetap dipakai).
+  if (passwords && typeof passwords === 'object') {
+    ['mekanik', 'pengawas', 'hse'].forEach(role => {
+      const v = passwords[role];
+      if (typeof v === 'string' && v.trim() !== '') APPROVAL_PASSWORDS[role] = v.trim();
+    });
+  }
 
   // Lokasi Site & Pihak Penyewa dari kolom D/E sheet "Master Unit".
   // Hanya timpa kalau ada isinya, supaya respons kosong tidak menghapus
@@ -1152,7 +1462,7 @@ async function loadMasterUnitFromCache() {
   try {
     const cached = await dbGet('settings', 'masterUnit');
     if (cached && cached.value) {
-      applyMasterUnit(cached.value.units, cached.value.lokasi, cached.value.penyewa);
+      applyMasterUnit(cached.value.units, cached.value.lokasi, cached.value.penyewa, cached.value.passwords, cached.value.unitMeta);
       updateMasterUnitSyncLabel(cached.value.syncedAt);
     }
   } catch (e) {
@@ -1193,11 +1503,11 @@ async function syncMasterUnit(showToast) {
     const text = await res.text();
     let json;
     try { json = JSON.parse(text); } catch (e) { json = null; }
-    if (json && json.status === 'ok' && applyMasterUnit(json.units, json.lokasi, json.penyewa)) {
+    if (json && json.status === 'ok' && applyMasterUnit(json.units, json.lokasi, json.penyewa, json.passwords, json.unitMeta)) {
       const syncedAt = new Date().toISOString();
       await dbPut('settings', {
         key: 'masterUnit',
-        value: { units: UNIT_OPTIONS, lokasi: LOKASI_OPTIONS, penyewa: PENYEWA_OPTIONS, syncedAt }
+        value: { units: UNIT_OPTIONS, lokasi: LOKASI_OPTIONS, penyewa: PENYEWA_OPTIONS, passwords: APPROVAL_PASSWORDS, unitMeta: UNIT_META, syncedAt }
       });
       updateMasterUnitSyncLabel(syncedAt);
       if (showToast) toast('✅ Daftar unit diperbarui', 'ok');
@@ -1299,6 +1609,49 @@ function dbClearAll(store) {
 
 // PIN supervisor — ubah nilai ini sesuai kebutuhan
 const SUPERVISOR_PIN = '1507';
+
+// ══════════════════════════════════════════════════════════
+// APPROVAL (Mekanik / Pengawas / HSE)
+// ══════════════════════════════════════════════════════════
+// Sandi per jabatan — SAMA SEPERTI SUPERVISOR_PIN DI ATAS: ini cuma
+// penghalang tampilan, BUKAN otentikasi aman. Siapa pun yang buka
+// "View Source" atau DevTools di browser bisa membaca nilai ini.
+// SUMBER SANDI SEKARANG dari sheet "Master Unit" (kolom G/H/I: Mekanik/
+// Pengawas/HSE) — nilai di bawah cuma fallback dipakai SEBELUM sync
+// pertama kali berhasil (mis. pertama kali install, belum online).
+// Diisi ulang otomatis tiap syncMasterUnit() berhasil — lihat applyMasterUnit().
+// Backend (Code.gs) juga WAJIB baca dari sheet yang sama di approveP2H,
+// supaya sandi yang divalidasi server selalu sinkron dengan yang diedit
+// user langsung di sheet, tanpa perlu redeploy script.
+let APPROVAL_PASSWORDS = {
+  mekanik:  'mekanik123',
+  pengawas: 'pengawas123',
+  hse:      'hse123'
+};
+const APPROVAL_ROLES = {
+  mekanik:  { label: 'Mekanik',  column: 'Diperiksa Mekanik' },
+  pengawas: { label: 'Pengawas', column: 'Diketahui Oleh Pengawas' },
+  hse:      { label: 'HSE',      column: 'Diketahui Oleh HSE' }
+};
+let approverAuth = null; // { jabatan, nama } setelah berhasil masuk
+let _approveList = [];   // cache hasil terakhir dari GAS untuk halaman Approve
+let _approvedTodayList = []; // ringkasan unit yang sudah di-approve HARI INI (role aktif)
+let _approveListLoaded = false; // sudah pernah selesai fetch _approveList di sesi buka halaman Approve ini — dipakai Rekap Harian supaya tidak nampilin 0 palsu sebelum data asli datang
+let _approveTab = 'pending'; // 'pending' | 'history' — tab aktif di halaman Approve
+let _approveHistory = { dt: [], exa: [], gdv: [], lv: [] }; // cache getApprovalHistory (flat per tipe, dipakai openApproveHistoryDetail via index gabungan)
+let _approveHistoryDetailCache = {}; // { 'sheetName|p2hId': row } — cache detail on-demand per sesi, biar klik ulang item yang sama tidak fetch lagi
+let _approveHistoryFlat = []; // gabungan semua tipe urut tampil, supaya index klik konsisten dgn openApproveHistoryDetail
+let _approveHistoryLoaded = false; // sudah pernah fetch sekali di sesi Approve ini (biar tab switch tidak fetch ulang tiap klik)
+let _apvHistFrom = ''; // filter rentang tanggal History Approve — format input type=date (yyyy-mm-dd), '' = tidak difilter
+let _apvHistTo   = '';
+
+// Parse "dd/MM/yyyy" (format kolom Tanggal P2H) -> Date tengah malam, atau null kalau gagal
+function parseTglDDMMYYYY(str) {
+  const m = String(str || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const d = new Date(+m[3], +m[2] - 1, +m[1]);
+  return isNaN(d.getTime()) ? null : d;
+}
 
 async function loadSettings() {
   const s = await dbGet('settings', 'config');
@@ -1591,8 +1944,10 @@ function showPage(name) {
   closeUnitDropdown();
   // Hentikan timer Jam Selesai P2H kalau keluar dari halaman form
   if (name !== 'form') stopP2HTimer();
-  // Kalau profil belum diisi, paksa ke settings
-  if (name !== 'settings' && (!settings.defNama || !settings.defLokasi || !settings.defPenyewa || !settings.defUnitType)) {
+  // Kalau profil belum diisi, paksa ke settings — kecuali untuk halaman
+  // Approve, yang dipakai Mekanik/Pengawas/HSE dan tidak butuh profil
+  // operator (Nama/Lokasi/Penyewa/Tipe Unit) sama sekali.
+  if (name !== 'settings' && name !== 'approve' && (!settings.defNama || !settings.defLokasi || !settings.defPenyewa || !settings.defUnitType)) {
     document.getElementById('setupModal').classList.add('show');
     return;
   }
@@ -1603,6 +1958,7 @@ function showPage(name) {
   if (nav) nav.classList.add('active');
   if (name === 'history') renderHistory();
   if (name === 'home') { updateStats(); renderHomeUnit(); }
+  if (name === 'approve') renderApprovePage();
   // Kunci dropdown tipe unit kecuali baru di-unlock supervisor
   if (name === 'settings') {
     lockProfileFieldsIfSet();
@@ -1918,6 +2274,24 @@ function selectUnit(val) {
   if (clear) clear.style.display = 'block';
   closeUnitDropdown();
   renderUnitList(val); // update selected highlight
+
+  // Auto-isi Lokasi Site & Pihak Penyewa sesuai assignment tetap unit ini
+  // (kolom C/D sheet "Master Unit", lihat UNIT_META) — supaya operator tidak
+  // perlu pilih manual tiap kali pilih ID Unit. Hanya menimpa kalau UNIT_META
+  // benar-benar punya data untuk unit ini DAN nilainya ada di daftar opsi
+  // (LOKASI_OPTIONS/PENYEWA_OPTIONS dari kolom F/G); kalau tidak match,
+  // select dibiarkan (tidak dipaksa ke opsi yang tidak ada di dropdown).
+  const meta = UNIT_META[val];
+  if (meta) {
+    const fLokasiSel = document.getElementById('f_lokasi');
+    if (fLokasiSel && meta.lokasi && LOKASI_OPTIONS.includes(meta.lokasi)) {
+      fLokasiSel.value = meta.lokasi;
+    }
+    const fPenyewaSel = document.getElementById('f_penyewa');
+    if (fPenyewaSel && meta.penyewa && PENYEWA_OPTIONS.includes(meta.penyewa)) {
+      fPenyewaSel.value = meta.penyewa;
+    }
+  }
 }
 
 function clearUnitSearch() {
@@ -1945,7 +2319,27 @@ function closeUnitDropdown() {
 
 function closeUnitDropdownDelay() {
   // Delay agar onmousedown di item sempat fire sebelum blur menutup dropdown
-  _closeDropdownTimer = setTimeout(closeUnitDropdown, 200);
+  _closeDropdownTimer = setTimeout(() => {
+    closeUnitDropdown();
+    validateUnitSearchOnBlur();
+  }, 200);
+}
+
+// Kalau operator ngetik ID unit yang nggak ada di daftar master lalu pindah
+// fokus tanpa milih dari dropdown, teks ketikannya DIHAPUS dari kotak —
+// supaya kotak nggak kelihatan "terisi" padahal f_unit (nilai yang beneran
+// tersimpan) kosong. Ini nyegah operator ngira ID unit-nya udah kepilih
+// padahal belum, dan tetap ke-block juga oleh cek wajib-pilih pas submit.
+function validateUnitSearchOnBlur() {
+  const search = document.getElementById('f_unit_search');
+  const hidden = document.getElementById('f_unit');
+  if (!search || !hidden) return;
+  if (hidden.value) return; // sudah valid (dipilih dari dropdown)
+  if (search.value.trim() === '') return; // memang kosong, tidak perlu apa-apa
+  search.value = '';
+  const clear = document.getElementById('unitSearchClear');
+  if (clear) clear.style.display = 'none';
+  toast('⚠ ID unit tidak ditemukan di daftar, silakan pilih dari daftar', 'err');
 }
 
 function setChk(i, val, btn) {
@@ -2016,7 +2410,8 @@ async function submitForm() {
   const parts = tanggalInput.split(' ')[0].split('/');
   const tanggal = `${parts[2]}-${parts[1]}-${parts[0]}`;
   if (!nama) { toast('⚠ Nama wajib diisi', 'err'); return; }
-  if (!unit) { toast('⚠ ID Unit wajib dipilih', 'err'); return; }
+  if (!unit) { toast('⚠ ID Unit wajib dipilih dari daftar', 'err'); return; }
+  if (!_unitOptions.includes(unit)) { toast('⚠ ID Unit tidak valid, pilih ulang dari daftar', 'err'); return; }
   const hm = document.getElementById('f_hm').value.trim();
   if (!hm) { toast('⚠ HM / KM wajib diisi', 'err'); return; }
 
@@ -2506,6 +2901,1088 @@ function buildPayload(rec) {
 }
 
 // ══════════════════════════════════════════════════════════
+// APPROVAL (Mekanik / Pengawas / HSE)
+// ══════════════════════════════════════════════════════════
+
+async function loadApproverAuth() {
+  const rec = await dbGet('settings', 'approverAuth');
+  approverAuth = (rec && rec.value) ? rec.value : null;
+}
+
+function renderApprovePage() {
+  const box = document.getElementById('approveBody');
+  if (!box) return;
+  if (!approverAuth) {
+    box.innerHTML = approveLoginHtml();
+  } else {
+    _approveTab = 'pending';
+    box.innerHTML = approveListShellHtml();
+    fetchApprovalList();
+  }
+}
+
+function approveLoginHtml() {
+  return `
+    <div class="settings-section">
+      <h3>🔐 Masuk sebagai Approver</h3>
+      <div class="settings-row">
+        <label>Jabatan</label>
+        <select id="apv_jabatan">
+          <option value="">-- Pilih Jabatan --</option>
+          <option value="mekanik">Mekanik</option>
+          <option value="pengawas">Pengawas</option>
+          <option value="hse">HSE</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>Nama Lengkap</label>
+        <input type="text" id="apv_nama" placeholder="Nama lengkap"/>
+      </div>
+      <div class="settings-row">
+        <label>Sandi</label>
+        <input type="password" id="apv_sandi" placeholder="Sandi sesuai jabatan"/>
+      </div>
+    </div>
+    <div id="apvLoginError" style="color:var(--nok);font-size:11px;margin:2px 2px 12px;min-height:14px"></div>
+    <button class="save-btn" onclick="approverLogin()">Masuk</button>
+  `;
+}
+
+function approverLogin() {
+  const jabatan = document.getElementById('apv_jabatan').value;
+  const nama    = document.getElementById('apv_nama').value.trim();
+  const sandi   = document.getElementById('apv_sandi').value;
+  const errBox  = document.getElementById('apvLoginError');
+  errBox.textContent = '';
+  if (!jabatan) { errBox.textContent = '⚠ Pilih jabatan dulu.'; return; }
+  if (!nama)    { errBox.textContent = '⚠ Nama wajib diisi.'; return; }
+  if (sandi !== APPROVAL_PASSWORDS[jabatan]) { errBox.textContent = '❌ Sandi salah.'; return; }
+  approverAuth = { jabatan, nama };
+  dbPut('settings', { key: 'approverAuth', value: approverAuth });
+  renderApprovePage();
+}
+
+function approveLogout() {
+  approverAuth = null;
+  dbPut('settings', { key: 'approverAuth', value: null });
+  renderApprovePage();
+}
+
+function approveListShellHtml() {
+  const role = APPROVAL_ROLES[approverAuth.jabatan];
+  return `
+    <div style="padding:2px 2px 14px">
+      <div style="font-size:14px;font-weight:700">Masuk sebagai <span style="color:var(--accent)">${approverAuth.nama}</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">Jabatan: ${role.label}</div>
+      <a href="javascript:void(0)" onclick="approveLogout()" style="color:var(--muted);font-size:11px;text-decoration:underline">Ganti akun</a>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 2px 12px">
+      <button id="approveTabBtn-pending" class="apv-tab-btn active" onclick="switchApproveTab('pending')">⏳ Menunggu <span id="approveTabCount-pending"></span></button>
+      <button id="approveTabBtn-history" class="apv-tab-btn" onclick="switchApproveTab('history')">✅ History Approve</button>
+      <button id="approveTabBtn-rekap" class="apv-tab-btn" onclick="switchApproveTab('rekap')">📊 Rekap Harian</button>
+    </div>
+    <div id="approveListArea">${emptyStateHtml('⏳ Memuat data...')}</div>
+  `;
+}
+
+// Ganti tab Menunggu <-> Riwayat. Riwayat cuma di-fetch sekali per sesi
+// buka halaman Approve (bukan tiap klik tab), supaya tidak boros request —
+// tombol refresh atas tetap bisa dipakai untuk fetch ulang keduanya.
+function switchApproveTab(tab) {
+  _approveTab = tab;
+  document.getElementById('approveTabBtn-pending').classList.toggle('active', tab === 'pending');
+  document.getElementById('approveTabBtn-history').classList.toggle('active', tab === 'history');
+  document.getElementById('approveTabBtn-rekap').classList.toggle('active', tab === 'rekap');
+  if (tab === 'pending') {
+    renderApproveList();
+  } else if (tab === 'history') {
+    if (_approveHistoryLoaded) {
+      renderApproveHistory();
+    } else {
+      document.getElementById('approveListArea').innerHTML = emptyStateHtml('⏳ Memuat riwayat...');
+      fetchApprovalHistory();
+    }
+  } else if (tab === 'rekap') {
+    renderApproveRekap();
+    // Tarik data Master Unit terbaru dari sheet dulu (async, tanpa toast),
+    // baru render ulang — supaya daftar unit yang tampil bukan fallback basi
+    // kalau sync sebelumnya belum sempat kelar (mis. baru buka app).
+    syncMasterUnit(false).then(() => {
+      if (_approveTab === 'rekap') renderApproveRekap();
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// REKAP HARIAN — daftar SEMUA unit (dari UNIT_OPTIONS, per tipe)
+// ditandai sudah/belum P2H HARI INI. Tidak fetch backend baru —
+// dipakai ulang dari _approveList (pending, milik role aktif) +
+// _approvedTodayList (sudah di-approve role aktif hari ini), yang
+// keduanya sudah ke-fetch begitu halaman Approve dibuka.
+// CATATAN ASUMSI: unit dianggap "sudah P2H hari ini" kalau submisinya
+// ada di salah satu dari dua sumber itu — asumsinya approve dilakukan
+// di hari yang sama dengan submit. Kalau ada P2H hari ini yang belum
+// sempat ke-approve/ke-refresh, gunakan tombol refresh atas dulu.
+// ══════════════════════════════════════════════════════════
+function getSubmittedTodaySet() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const set = new Set();
+  (_approveList || []).forEach(item => {
+    const r = (item && item.row) || {};
+    const d = parseTglDDMMYYYY(r['Tanggal P2H']);
+    if (d && d.getTime() === today.getTime()) {
+      set.add(String(r['ID Unit'] || '').trim());
+    }
+  });
+  (_approvedTodayList || []).forEach(it => {
+    if (it && it.idUnit) set.add(String(it.idUnit).trim());
+  });
+  return set;
+}
+
+// Filter Pihak Penyewa untuk tab Rekap Harian (in-app, bukan PDF) — pakai
+// key yang sama dengan PENYEWA_GROUPS supaya konsisten dengan pilihan
+// Download PDF. 'all' = tampilkan semua penyewa tanpa filter.
+let _rekapPenyewaFilter = 'all';
+function setRekapPenyewaFilter(key) {
+  _rekapPenyewaFilter = key;
+  renderApproveRekap();
+}
+
+// Lokasi & Penyewa default TERBUKA di tab Rekap Harian (beda dari tab
+// Menunggu yang default tertutup) — di sini fungsinya untuk lihat status
+// sekilas, jadi tidak perlu diklik dulu. Set ini cuma nyimpen yang SUDAH
+// DITUTUP manual, supaya state-nya nggak balik kebuka tiap render ulang.
+const _rekapClosedLokSet = new Set();
+const _rekapClosedPenSet = new Set();
+function toggleRekapLok(key) {
+  if (_rekapClosedLokSet.has(key)) _rekapClosedLokSet.delete(key);
+  else _rekapClosedLokSet.add(key);
+  renderApproveRekap();
+}
+function toggleRekapPen(key) {
+  if (_rekapClosedPenSet.has(key)) _rekapClosedPenSet.delete(key);
+  else _rekapClosedPenSet.add(key);
+  renderApproveRekap();
+}
+
+function renderApproveRekap() {
+  const area = document.getElementById('approveListArea');
+  if (!area) return;
+
+  // FIX BUG — Rekap Harian bergantung pada _approveList/_approvedTodayList
+  // (dari getApprovalList, sama seperti tab Menunggu). Kalau tab ini dibuka
+  // duluan sebelum fetch pertama itu selesai, dulu langsung nampilin "0
+  // Sudah" untuk semua unit — kelihatan seperti hasil final padahal cuma
+  // data kosong yang belum sempat terisi. Sekarang tampilkan status memuat
+  // dulu selama data pending belum pernah selesai di-fetch sekalipun.
+  if (!_approveListLoaded) {
+    area.innerHTML = emptyStateHtml('⏳ Memuat rekap...');
+    return;
+  }
+
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const order = ['dt', 'exa', 'gdv', 'lv'];
+  const submitted = getSubmittedTodaySet();
+
+  // Saring dulu unit per tipe sesuai pill Pihak Penyewa yang aktif — dipakai
+  // BERSAMA oleh kartu ringkasan atas maupun grouping Lokasi/Penyewa di
+  // bawah, supaya keduanya selalu konsisten (dulu kartu ringkasan atas
+  // hardcode ke seluruh fleet dan tidak ikut berubah saat pill diklik).
+  const filteredUnitsByType = {};
+  order.forEach(t => {
+    filteredUnitsByType[t] = (UNIT_OPTIONS[t] || []).filter(u => {
+      if (_rekapPenyewaFilter === 'all') return true;
+      const { penyewa } = getUnitLokasiPenyewa(u);
+      const grp = PENYEWA_GROUPS[_rekapPenyewaFilter];
+      return grp && grp.match.includes(normPenyewa(penyewa));
+    });
+  });
+
+  // Hitung sudah/belum PER TIPE dari unit yang SUDAH disaring sesuai pill
+  // Penyewa aktif (bukan lagi total seluruh fleet).
+  const perType = {};
+  order.forEach(t => {
+    let sudah = 0, belum = 0;
+    filteredUnitsByType[t].forEach(u => { if (submitted.has(u)) sudah++; else belum++; });
+    perType[t] = { sudah, belum, total: filteredUnitsByType[t].length };
+  });
+
+  const todayStr = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 2px 10px;gap:8px">
+      <div style="font-size:11px;color:var(--muted)">Rekap ${todayStr}</div>
+      <button class="apv-tab-btn" style="flex:0 0 auto;padding:7px 12px;font-size:11px" onclick="openPdfPenyewaModal()">⬇️ Download PDF</button>
+    </div>`;
+
+  // 4 kartu ringkasan, satu per tipe unit — 2 kolom x 2 baris di layar sempit.
+  html += `<div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 2px 14px">`;
+  order.forEach(t => {
+    const { sudah, belum, total } = perType[t];
+    if (total === 0) return;
+    html += `
+      <div style="flex:1 1 calc(50% - 4px);min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">${unitLabel[t]} (${total})</div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;background:var(--ok-lt);border-radius:8px;padding:6px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--ok)">${sudah}</div>
+            <div style="font-size:9px;color:var(--text2)">Sudah</div>
+          </div>
+          <div style="flex:1;background:var(--nok-lt);border-radius:8px;padding:6px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--nok)">${belum}</div>
+            <div style="font-size:9px;color:var(--text2)">Belum</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
+  // Filter Pihak Penyewa — pill button, sama pilihannya dengan modal
+  // Download PDF (PENYEWA_GROUPS), supaya daftar di bawah bisa difokuskan
+  // ke satu penyewa saja tanpa harus scroll semua unit tercampur.
+  html += `<div style="display:flex;gap:6px;overflow-x:auto;padding:0 2px 12px;">`;
+  const pillBase = 'flex:0 0 auto;padding:6px 12px;font-size:11px;border-radius:20px;font-weight:700;cursor:pointer;white-space:nowrap;border:1.5px solid';
+  html += `<button style="${pillBase} ${_rekapPenyewaFilter === 'all' ? ' var(--accent);background:var(--accent);color:#fff' : ' var(--border);background:var(--white);color:var(--text2)'}" onclick="setRekapPenyewaFilter('all')">Semua</button>`;
+  Object.keys(PENYEWA_GROUPS).forEach(key => {
+    const active = _rekapPenyewaFilter === key;
+    html += `<button style="${pillBase} ${active ? ' var(--accent);background:var(--accent);color:#fff' : ' var(--border);background:var(--white);color:var(--text2)'}" onclick="setRekapPenyewaFilter('${escJs(key)}')">${PENYEWA_GROUPS[key].label}</button>`;
+  });
+  html += `</div>`;
+
+  // Kelompokkan SEMUA unit (sudah maupun belum P2H) per Lokasi Site ->
+  // Pihak Penyewa -> Tipe unit, disaring dulu sesuai pill Penyewa yang
+  // aktif — struktur ini sama persis dengan yang dipakai Download PDF,
+  // supaya tampilan di HP dan hasil cetak konsisten satu sama lain.
+  const groups = {}; // { lokasi: { penyewa: { tipe: [idUnit,...] } } }
+  order.forEach(t => {
+    filteredUnitsByType[t].forEach(u => {
+      const { lokasi, penyewa } = getUnitLokasiPenyewa(u);
+      const lok = lokasi && lokasi !== '-' ? lokasi : 'Lokasi Belum Diketahui';
+      const pen = penyewa && penyewa !== '-' ? penyewa : 'Pihak Belum Diketahui';
+      if (!groups[lok]) groups[lok] = {};
+      if (!groups[lok][pen]) groups[lok][pen] = {};
+      if (!groups[lok][pen][t]) groups[lok][pen][t] = [];
+      groups[lok][pen][t].push(u);
+    });
+  });
+
+  if (Object.keys(groups).length === 0) {
+    html += emptyStateHtml('Tidak ada unit untuk pilihan penyewa ini');
+    area.innerHTML = html;
+    return;
+  }
+
+  Object.keys(groups).sort().forEach(lok => {
+    const penGroups = groups[lok];
+    const lokTotal = Object.values(penGroups).reduce((n, byType) => n + Object.values(byType).reduce((m, arr) => m + arr.length, 0), 0);
+    const lokKey = 'RL::' + lok;
+    const lokOpen = !_rekapClosedLokSet.has(lokKey);
+    html += `
+      <div class="apv-lok-h${lokOpen ? ' open' : ''}" onclick="toggleRekapLok('${escJs(lokKey)}')">
+        <span>📍 ${lok} (${lokTotal})</span>
+        <span class="chev">›</span>
+      </div>
+      <div class="apv-lok-body${lokOpen ? ' open' : ''}">`;
+    Object.keys(penGroups).sort().forEach(pen => {
+      const byType = penGroups[pen];
+      const penTotal = Object.values(byType).reduce((n, arr) => n + arr.length, 0);
+      const penKey = 'RP::' + lok + '::' + pen;
+      const penOpen = !_rekapClosedPenSet.has(penKey);
+      html += `
+        <div class="apv-pen-h${penOpen ? ' open' : ''}" onclick="toggleRekapPen('${escJs(penKey)}')">
+          <span>${pen} (${penTotal})</span>
+          <span class="chev">›</span>
+        </div>
+        <div class="apv-pen-body${penOpen ? ' open' : ''}">`;
+      order.filter(t => byType[t] && byType[t].length).forEach(t => {
+        const sudahType = byType[t].filter(u => submitted.has(u)).length;
+        html += `<div class="apv-type-h">${unitLabel[t]} (${byType[t].length}) — ✅ ${sudahType} · ⏳ ${byType[t].length - sudahType}</div>`;
+        byType[t].forEach(u => {
+          const done = submitted.has(u);
+          html += `
+            <div class="hist-item" style="cursor:default">
+              <div class="status-dot ${done ? 'synced' : 'pending'}"></div>
+              <div class="hist-item-info">
+                <div class="unit">${u}</div>
+                <div class="meta">${done ? '✅ Sudah P2H hari ini' : '⏳ Belum P2H hari ini'}</div>
+              </div>
+            </div>`;
+        });
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+
+  area.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════
+// DOWNLOAD PDF — REKAP HARIAN
+// Cetak lewat dialog print browser (window.print), bukan library PDF
+// terpisah, supaya tetap ringan & jalan offline di PWA ini. User tinggal
+// pilih "Simpan sebagai PDF" di dialog print itu.
+// ══════════════════════════════════════════════════════════
+
+// Cari Lokasi Site & Pihak Penyewa untuk satu ID Unit.
+// Prioritas 1: data submission P2H HARI INI (kalau masih pending di
+// _approveList milik role aktif) — paling akurat karena diisi operator
+// saat itu juga.
+// Prioritas 2: UNIT_META dari sheet "Master Unit" (assignment tetap unit
+// itu) — dipakai juga untuk unit yang BELUM P2H hari ini, karena untuk
+// unit itu tidak ada data submission sama sekali.
+// Kalau keduanya tidak ada (mis. Code.gs belum kirim unitMeta), balik '-'.
+function getUnitLokasiPenyewa(idUnit) {
+  const pending = (_approveList || []).find(item => item && item.row && String(item.row['ID Unit'] || '').trim() === idUnit);
+  if (pending) {
+    return {
+      lokasi:  normLokasi(pending.row['Lokasi Site']),
+      penyewa: pending.row['Pihak Penyewa'] || '-'
+    };
+  }
+  const meta = UNIT_META[idUnit];
+  if (meta) {
+    return { lokasi: normLokasi(meta.lokasi), penyewa: meta.penyewa || '-' };
+  }
+  return { lokasi: '-', penyewa: '-' };
+}
+
+// Hitung ringkasan checklist satu unit: berapa item sudah diisi (dari total
+// item checklist tipe unit itu) dan daftar nama komponen yang berstatus
+// Rusak. Dipakai Rekap Harian > Download PDF supaya tiap ID Unit tidak cuma
+// nampilin status Sudah/Belum P2H, tapi juga angka progress checklist-nya
+// dan rincian komponen mana saja yang rusak.
+function computeChecklistSummary(row, unitType) {
+  const cfg = FORMS[unitType];
+  if (!cfg || !row) return { done: 0, total: 0, baik: 0, rusak: 0, rusakItems: [], keterangan: '', tindakan: '' };
+  let done = 0, rusak = 0;
+  const rusakItems = [];
+  cfg.items.forEach(it => {
+    const val = String(row[it] || '');
+    if (val !== '') done++;
+    if (val.startsWith('Rusak')) {
+      rusak++;
+      // Catatan kerusakan operator disimpan setelah "Rusak: " (lihat
+      // submitP2H() -> record.checklist[item] = `Rusak: ${note}`). Kalau
+      // operator tidak isi catatan, value-nya cuma 'Rusak' polos.
+      const note = val.startsWith('Rusak:') ? val.slice(6).trim() : '';
+      rusakItems.push({ label: getShortItemLabel(unitType, it), note });
+    }
+  });
+  return {
+    done, total: cfg.items.length, baik: done - rusak, rusak, rusakItems,
+    // Keterangan Pengecekan & Tindakan: catatan umum operator untuk seluruh
+    // unit (bukan per-item), wajib diisi setiap submit P2H — dulu tidak
+    // ikut dibawa ke Rekap Harian, padahal sering berisi info penting
+    // (mis. "kotak p3k kosong", "aman untuk bekerja") di luar checklist itu sendiri.
+    keterangan: row['Keterangan Pengecekan'] || '',
+    tindakan: row['Tindakan'] || ''
+  };
+}
+
+// Kumpulkan ringkasan checklist (computeChecklistSummary) untuk SEMUA unit
+// yang sudah P2H hari ini, gabungan dari 2 sumber sama seperti
+// getSubmittedTodaySet(): _approveList (masih pending approve, row lengkap
+// masih ada) dan _approvedTodayList (sudah di-approve — ringkasannya
+// disimpan duluan saat approve, karena row lengkap sudah dibuang dari memori
+// begitu item di-splice dari _approveList).
+function getUnitChecklistSummaryToday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const map = new Map();
+  (_approveList || []).forEach(item => {
+    const r = (item && item.row) || {};
+    const d = parseTglDDMMYYYY(r['Tanggal P2H']);
+    if (d && d.getTime() === today.getTime()) {
+      const idUnit = String(r['ID Unit'] || '').trim();
+      map.set(idUnit, computeChecklistSummary(r, item.unitType));
+    }
+  });
+  (_approvedTodayList || []).forEach(it => {
+    if (it && it.idUnit && it.checklistSummary) {
+      map.set(String(it.idUnit).trim(), it.checklistSummary);
+    }
+  });
+  return map;
+}
+
+// Grup pihak penyewa untuk pilihan download PDF. PT. TAS & PT. AAS digabung
+// jadi satu pilihan unduhan (tapi isinya tetap dipisah per penyewa di dalam
+// laporannya), sementara MAHLIGAI & PT. NEC masing-masing pilihan sendiri.
+// Kalau ke depannya ada penyewa baru atau susunan grup berubah, cukup edit
+// object ini saja.
+const PENYEWA_GROUPS = {
+  tas_aas:  { label: 'PT. TAS + PT. AAS', match: ['PTTAS', 'PTAAS'] },
+  mahligai: { label: 'MAHLIGAI',          match: ['MAHLIGAI'] },
+  nec:      { label: 'PT. NEC',           match: ['PTNEC'] }
+};
+function normPenyewa(s) {
+  return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+// Normalisasi nama Lokasi Site supaya variasi ketik/typo di sheet (mis.
+// "Laronai" vs "Laroenai", spasi ganda, beda kapitalisasi) tidak dianggap
+// lokasi terpisah saat grouping Rekap Harian & Download PDF. Dicocokkan ke
+// LOKASI_OPTIONS (nama baku) via perbandingan huruf besar tanpa spasi/simbol;
+// kalau tidak ketemu padanannya, nama asli dari sheet tetap dipakai apa adanya.
+function normLokasi(s) {
+  const raw = String(s || '').trim();
+  if (!raw || raw === '-') return raw || '-';
+  const key = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const canonical = (typeof LOKASI_OPTIONS !== 'undefined' ? LOKASI_OPTIONS : [])
+    .find(opt => opt.toUpperCase().replace(/[^A-Z0-9]/g, '') === key);
+  return canonical || raw;
+}
+
+function openPdfPenyewaModal() {
+  const m = document.getElementById('pdfPenyewaModal');
+  if (m) m.classList.add('show');
+}
+function closePdfPenyewaModal() {
+  const m = document.getElementById('pdfPenyewaModal');
+  if (m) m.classList.remove('show');
+}
+function downloadRekapForSelectedPenyewa() {
+  const sel = document.getElementById('pdfPenyewaSelect');
+  const groupKey = sel ? sel.value : '';
+  closePdfPenyewaModal();
+  generateRekapPDF(groupKey);
+}
+
+function generateRekapPDF(groupKey) {
+  const group = PENYEWA_GROUPS[groupKey];
+  if (!group) return;
+
+  const CATS = [
+    { key: 'dt',    label: 'Dump Truck',    types: ['dt'] },
+    { key: 'heavy', label: 'Heavy Equipment (Excavator + Grader/Dozer/Vibro)', types: ['exa', 'gdv'] },
+    { key: 'lv',    label: 'Light Vehicle', types: ['lv'] }
+  ];
+
+  const submitted = getSubmittedTodaySet();
+  const checklistMap = getUnitChecklistSummaryToday();
+  const todayStr = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+
+  let html = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px;"><img src="data:image/png;base64,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" style="width:34px;height:34px;border-radius:8px;object-fit:cover;flex-shrink:0;" alt="Logo MG"/><div class="print-report-title" style="margin-bottom:0;">P2H MAKKURAGA GRUP — Rekap Harian P2H</div></div>
+    <div class="print-report-sub">Pihak Penyewa: ${group.label} &nbsp;·&nbsp; Tanggal: ${todayStr}</div>
+  `;
+  let isFirstCat = true;
+
+  CATS.forEach(cat => {
+    // Kumpulkan unit kategori ini yang penyewa-nya cocok dengan grup yang
+    // dipilih, dikelompokkan per Lokasi Site -> Pihak Penyewa (penyewa
+    // tetap dipisah sebagai sub-section walau digabung dalam 1 unduhan).
+    const groups = {}; // { lokasi: { penyewa: [ {idUnit, done}, ... ] } }
+    let totalSudah = 0, totalBelum = 0;
+
+    cat.types.forEach(t => {
+      (UNIT_OPTIONS[t] || []).forEach(u => {
+        const { lokasi, penyewa } = getUnitLokasiPenyewa(u);
+        if (!group.match.includes(normPenyewa(penyewa))) return;
+        const done = submitted.has(u);
+        if (done) totalSudah++; else totalBelum++;
+        const lok = lokasi && lokasi !== '-' ? lokasi : 'Lokasi Belum Diketahui';
+        const pen = penyewa && penyewa !== '-' ? penyewa : 'Pihak Belum Diketahui';
+        if (!groups[lok]) groups[lok] = {};
+        if (!groups[lok][pen]) groups[lok][pen] = [];
+        groups[lok][pen].push({ idUnit: u, done, summary: checklistMap.get(u) });
+      });
+    });
+
+    if (totalSudah + totalBelum === 0) return; // kategori ini tidak ada unit di grup penyewa ini
+
+    html += `<div class="print-category-h${isFirstCat ? ' first' : ''}">${cat.label}</div>`;
+    isFirstCat = false;
+    html += `<div class="print-report-summary">Total: ${totalSudah + totalBelum} unit &nbsp;·&nbsp; <span class="st-ok">✅ Sudah P2H: ${totalSudah}</span> &nbsp;·&nbsp; <span class="st-nok">⏳ Belum P2H: ${totalBelum}</span></div>`;
+
+    Object.keys(groups).sort().forEach(lok => {
+      html += `<div class="print-lokasi-h">📍 ${lok}</div>`;
+      Object.keys(groups[lok]).sort().forEach(pen => {
+        html += `<div class="print-penyewa-h">${pen}</div>`;
+        groups[lok][pen].forEach(({ idUnit, done, summary }) => {
+          // Ganti "(25/25 item)" jadi breakdown baik vs rusak, supaya jelas
+          // dari angkanya saja berapa yang bermasalah tanpa perlu baca detail.
+          const itemCount = (done && summary)
+            ? ` <span style="color:#555;font-weight:400">(${summary.baik} item baik, ${summary.rusak} item rusak)</span>`
+            : '';
+          html += `
+            <div class="print-unit-wrap">
+              <div class="print-unit-row">
+                <span>${idUnit}</span>
+                <span class="${done ? 'st-ok' : 'st-nok'}">${done ? '✅ Sudah P2H' : '⏳ Belum P2H'}${itemCount}</span>
+              </div>`;
+          // Rincian tiap komponen rusak jadi poin-poin terpisah (bukan satu
+          // baris panjang) — nama komponen singkat + catatan kerusakan dari
+          // operator kalau ada, supaya langsung kebaca tanpa harus buka detail.
+          if (done && summary && summary.rusak > 0) {
+            html += `<div class="print-unit-detail">⚠ ${summary.rusak} item rusak:</div>`;
+            html += '<ul class="print-rusak-list">';
+            summary.rusakItems.forEach(ri => {
+              html += `<li>${ri.label}${ri.note ? ` — <i>${ri.note}</i>` : ''}</li>`;
+            });
+            html += '</ul>';
+          }
+          // Keterangan Pengecekan: catatan umum operator untuk seluruh unit
+          // (wajib diisi tiap submit), sering berisi info tambahan di luar
+          // checklist per-item (mis. "kotak p3k kosong", "aman untuk bekerja").
+          if (done && summary && summary.keterangan) {
+            html += `<div class="print-unit-note">📝 <i>${summary.keterangan}</i></div>`;
+          }
+          html += `</div>`;
+        });
+      });
+    });
+  });
+
+  const printArea = document.getElementById('printReportArea');
+  if (!printArea) return;
+  printArea.innerHTML = html;
+
+  // Beri jeda sedikit supaya innerHTML sempat ke-render sebelum dialog
+  // print browser dibuka (kalau langsung dipanggil, kadang konten masih
+  // kosong di preview print pada beberapa browser).
+  setTimeout(() => window.print(), 150);
+}
+
+function emptyStateHtml(msg) {
+  return `<div class="empty-state"><div class="icon">📋</div><p>${msg}</p></div>`;
+}
+
+async function fetchApprovalList() {
+  const area = document.getElementById('approveListArea');
+  if (!area) return;
+  if (!GAS_URL) { area.innerHTML = emptyStateHtml('⚠ URL GAS belum diset'); return; }
+  try {
+    const res = await fetch(GAS_URL + '?action=getApprovalList&role=' + encodeURIComponent(approverAuth.jabatan), {
+      method: 'GET', redirect: 'follow'
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
+    if (json.status !== 'ok') { area.innerHTML = emptyStateHtml('❌ ' + (json.message || 'Gagal memuat data')); return; }
+    _approveList = json.list || [];
+    _approvedTodayList = json.approvedToday || [];
+    _approveListLoaded = true;
+    updateApproveBadge();
+    updateApproveTabCount();
+    // FIX BUG — dulu selalu renderApproveList() di sini, jadi kalau user
+    // sudah pindah ke tab Rekap Harian SEBELUM fetch ini selesai (race
+    // condition), Rekap Harian kepentok terus nampilin 0/salah karena tidak
+    // pernah di-render ulang dengan data yang baru datang. Sekarang render
+    // tab mana pun yang sedang aktif — Menunggu maupun Rekap Harian sama-sama
+    // bergantung pada _approveList/_approvedTodayList ini.
+    if (_approveTab === 'pending') renderApproveList();
+    else if (_approveTab === 'rekap') renderApproveRekap();
+  } catch (e) {
+    area.innerHTML = emptyStateHtml('❌ ' + e.message);
+  }
+}
+
+function updateApproveTabCount() {
+  const el = document.getElementById('approveTabCount-pending');
+  if (!el) return;
+  el.textContent = _approveList.length > 0 ? `(${_approveList.length})` : '';
+}
+
+// ══════════════════════════════════════════════════════════
+// RIWAYAT APPROVAL — semua P2H yang SUDAH di-approve role aktif,
+// dari semua tanggal (bukan cuma hari ini), dikelompokkan per tipe
+// unit, klik untuk lihat detail lengkap + info siapa/kapan approve.
+// ══════════════════════════════════════════════════════════
+// FIX PERFORMA — dulu tab History Approve selalu nunggu fetch GAS penuh
+// (bisa beberapa detik kalau sheet sudah besar) sebelum tampil apa-apa.
+// Sekarang pola stale-while-revalidate: kalau ada cache lokal (IndexedDB)
+// dari sesi/refresh sebelumnya, tampilkan itu DULU secara instan, baru
+// tarik data segar dari server di belakang layar dan render ulang diam-diam
+// kalau ada bedanya. Kalau belum ada cache sama sekali (pertama kali buka),
+// baru tampilkan spinner sambil nunggu fetch pertama.
+async function fetchApprovalHistory() {
+  const area = document.getElementById('approveListArea');
+  if (!area) return;
+  if (!GAS_URL) { area.innerHTML = emptyStateHtml('⚠ URL GAS belum diset'); return; }
+
+  const cacheKey = 'approveHistory:' + (approverAuth ? approverAuth.jabatan : '');
+  let hasCache = false;
+
+  try {
+    const cached = await dbGet('settings', cacheKey);
+    if (cached && cached.value && cached.value.history) {
+      _approveHistory = cached.value.history;
+      _approveHistoryLoaded = true;
+      hasCache = true;
+      if (_approveTab === 'history') renderApproveHistory();
+    }
+  } catch (e) { /* belum ada cache, lanjut ke fetch biasa di bawah */ }
+
+  if (!hasCache) area.innerHTML = emptyStateHtml('⏳ Memuat riwayat...');
+
+  try {
+    const res = await fetch(GAS_URL + '?action=getApprovalHistory&role=' + encodeURIComponent(approverAuth.jabatan), {
+      method: 'GET', redirect: 'follow'
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
+    if (json.status !== 'ok') {
+      if (!hasCache) area.innerHTML = emptyStateHtml('❌ ' + (json.message || 'Gagal memuat riwayat'));
+      return;
+    }
+    _approveHistory = json.history || { dt: [], exa: [], gdv: [], lv: [] };
+    _approveHistoryLoaded = true;
+    await dbPut('settings', { key: cacheKey, value: { history: _approveHistory, syncedAt: new Date().toISOString() } });
+    if (_approveTab === 'history') renderApproveHistory();
+  } catch (e) {
+    if (!hasCache) area.innerHTML = emptyStateHtml('❌ ' + e.message);
+  }
+}
+
+function renderApproveHistory() {
+  const area = document.getElementById('approveListArea');
+  if (!area) return;
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const order = ['dt', 'exa', 'gdv', 'lv'];
+
+  const fromDate = _apvHistFrom ? new Date(_apvHistFrom + 'T00:00:00') : null;
+  const toDate   = _apvHistTo   ? new Date(_apvHistTo   + 'T00:00:00') : null;
+
+  const filterBar = `
+    <div style="display:flex;gap:8px;align-items:end;padding:2px 2px 14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <label style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px">Dari Tanggal</label>
+        <input type="date" id="apvHistFromInput" value="${_apvHistFrom}" style="width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);background:var(--white)"/>
+      </div>
+      <div style="flex:1;min-width:120px">
+        <label style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px">Sampai Tanggal</label>
+        <input type="date" id="apvHistToInput" value="${_apvHistTo}" style="width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);background:var(--white)"/>
+      </div>
+      <button class="apv-tab-btn" style="flex:0 0 auto;padding:8px 14px" onclick="applyApproveHistoryFilter()">Terapkan</button>
+      ${(_apvHistFrom || _apvHistTo) ? `<button class="apv-tab-btn" style="flex:0 0 auto;padding:8px 14px" onclick="resetApproveHistoryFilter()">✕ Reset</button>` : ''}
+    </div>`;
+
+  // Susun & saring dulu — item yang tanggalnya di luar rentang, atau tidak
+  // bisa diparse sama sekali, dibuang dari tampilan (bukan dari data asli).
+  const groupedFiltered = {};
+  order.forEach(t => {
+    groupedFiltered[t] = (_approveHistory[t] || []).filter(item => {
+      if (!fromDate && !toDate) return true;
+      const d = parseTglDDMMYYYY(item.tanggal);
+      if (!d) return false;
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
+  });
+
+  _approveHistoryFlat = [];
+  order.forEach(t => groupedFiltered[t].forEach(item => _approveHistoryFlat.push(item)));
+
+  if (_approveHistoryFlat.length === 0) {
+    area.innerHTML = filterBar + emptyStateHtml(
+      (_apvHistFrom || _apvHistTo) ? 'Tidak ada riwayat di rentang tanggal ini' : 'Belum ada riwayat approval'
+    );
+    return;
+  }
+
+  let html = filterBar;
+  let flatIdx = 0;
+  order.forEach(t => {
+    const items = groupedFiltered[t];
+    if (items.length === 0) return;
+    html += `<div class="section-header" style="padding:14px 2px 6px">${unitLabel[t]} (${items.length})</div>`;
+    items.forEach(item => {
+      const idx = flatIdx++;
+      html += `
+        <div class="hist-item" onclick="openApproveHistoryDetail(${idx})" style="cursor:pointer">
+          <div class="status-dot synced"></div>
+          <div class="hist-item-info">
+            <div class="unit">${item.idUnit} · ${unitLabel[t]}</div>
+            <div class="meta-nama">${item.approvedText.split('\n')[1] || '-'}</div>
+            <div class="meta">${item.tanggal || '-'} · Disetujui ${item.approvedWaktu || '-'}</div>
+          </div>
+          <div style="color:var(--muted);font-size:16px;align-self:center">›</div>
+        </div>`;
+    });
+  });
+  area.innerHTML = html;
+}
+
+function applyApproveHistoryFilter() {
+  _apvHistFrom = document.getElementById('apvHistFromInput').value || '';
+  _apvHistTo   = document.getElementById('apvHistToInput').value || '';
+  if (_apvHistFrom && _apvHistTo && _apvHistFrom > _apvHistTo) {
+    toast('⚠ "Dari Tanggal" tidak boleh setelah "Sampai Tanggal"', 'err');
+    return;
+  }
+  renderApproveHistory();
+}
+
+function resetApproveHistoryFilter() {
+  _apvHistFrom = '';
+  _apvHistTo = '';
+  renderApproveHistory();
+}
+
+// FIX PERFORMA — item.row sudah tidak lagi dikirim di list riwayat (lihat
+// catatan performa di getApprovalHistory di Code.gs), jadi detail lengkap
+// (seluruh kolom checklist) di-fetch on-demand dari getApprovalHistoryDetail
+// saat item diklik. Hasil fetch di-cache per sesi di _approveHistoryDetailCache
+// supaya klik ulang item yang sama tidak fetch dua kali.
+async function openApproveHistoryDetail(idx) {
+  const item = _approveHistoryFlat[idx];
+  if (!item) return;
+
+  const cacheKey = item.sheetName + '|' + item.p2hId;
+  let r = _approveHistoryDetailCache[cacheKey];
+
+  document.getElementById('detailTitle').textContent = `${item.p2hId} · ${({ dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' })[item.unitType] || item.unitType}`;
+
+  if (!r) {
+    document.getElementById('detailBody').innerHTML = emptyStateHtml('⏳ Memuat detail...');
+    document.getElementById('detailModal').classList.add('show');
+    try {
+      const res = await fetch(GAS_URL + '?action=getApprovalHistoryDetail&sheetName=' + encodeURIComponent(item.sheetName) + '&p2hId=' + encodeURIComponent(item.p2hId), {
+        method: 'GET', redirect: 'follow'
+      });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
+      if (json.status !== 'ok' || !json.row) {
+        document.getElementById('detailBody').innerHTML = emptyStateHtml('❌ ' + (json.message || 'Gagal memuat detail'));
+        return;
+      }
+      r = json.row;
+      _approveHistoryDetailCache[cacheKey] = r;
+    } catch (e) {
+      document.getElementById('detailBody').innerHTML = emptyStateHtml('❌ ' + e.message);
+      return;
+    }
+  } else {
+    document.getElementById('detailModal').classList.add('show');
+  }
+
+  renderApproveHistoryDetailBody(item, r);
+}
+
+function renderApproveHistoryDetailBody(item, r) {
+  const cfg = FORMS[item.unitType];
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const nama = cfg ? (r[cfg.namaField] || '-') : '-';
+  const total = cfg ? cfg.items.length : 0;
+  let done = 0, rusak = 0;
+  let chkHtml = '<div class="modal-chk-list">';
+  if (cfg) {
+    cfg.items.forEach((it, i) => {
+      if (cfg.sectionBreaks && cfg.sectionBreaks[i]) {
+        chkHtml += `<div class="modal-section-lbl">${cfg.sectionBreaks[i].icon} ${cfg.sectionBreaks[i].label}</div>`;
+      }
+      const val = r[it] || '';
+      if (val !== '') done++;
+      if (String(val).startsWith('Rusak')) rusak++;
+      const cls = val === 'Baik' ? 'ok' : String(val).startsWith('Rusak') ? 'nok' : 'empty';
+      chkHtml += `
+        <div class="modal-chk-row ${cls}">
+          <div class="modal-chk-num">${i+1}</div>
+          <div class="modal-chk-text">${it}</div>
+          <div class="modal-chk-badge ${cls}">${val || '—'}</div>
+        </div>`;
+    });
+  }
+  chkHtml += '</div>';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div style="background:var(--ok-lt);border:1px solid var(--ok);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text)">
+      ✅ <b>${item.approvedText.split('\n')[1] || '-'}</b><br/>
+      Disetujui ${item.approvedWaktu || '-'}
+    </div>
+    <div class="modal-meta">
+      <div class="modal-meta-item"><div class="lbl">P2H ID</div><div class="val" style="font-size:11px">${item.p2hId}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Tanggal</div><div class="val">${r['Tanggal P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Jam Mulai</div><div class="val">${r['Jam Pengisian P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Jam Selesai P2H</div><div class="val">${r['Jam Selesai P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Durasi P2H</div><div class="val">${r['Durasi P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Driver/Operator</div><div class="val">${nama}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Lokasi Site</div><div class="val">${r['Lokasi Site'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Pihak Penyewa</div><div class="val">${r['Pihak Penyewa'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">${cfg?.hmLabel || 'HM/KM'}</div><div class="val">${r[cfg?.hmLabel] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Checklist</div><div class="val">${done}/${total} item</div></div>
+      <div class="modal-meta-item"><div class="lbl">Item Rusak</div><div class="val" style="color:${rusak>0?'var(--nok)':'var(--ok)'}">${rusak} item</div></div>
+    </div>
+    ${r['Keterangan Pengecekan'] ? `<div style="background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2)"><b>Keterangan:</b> ${r['Keterangan Pengecekan']}</div>` : ''}
+    ${r['Tindakan'] ? `<div style="background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2)"><b>Tindakan:</b> ${r['Tindakan']}</div>` : ''}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Detail Checklist</div>
+    ${chkHtml}
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+async function silentRefreshApproveBadge() {
+  // Dipanggil saat app dibuka, sebelum halaman Approve pernah dibuka —
+  // supaya badge jumlah pending muncul di bottom nav tanpa perlu tap dulu.
+  if (!approverAuth || !GAS_URL) return;
+  try {
+    const res = await fetch(GAS_URL + '?action=getApprovalList&role=' + encodeURIComponent(approverAuth.jabatan), {
+      method: 'GET', redirect: 'follow'
+    });
+    const json = await res.json();
+    if (json.status === 'ok') {
+      _approveList = json.list || [];
+      updateApproveBadge();
+    }
+  } catch (e) { /* diam-diam, tidak toast — ini cuma background refresh */ }
+}
+
+function updateApproveBadge() {
+  const badge = document.getElementById('approveBadge');
+  if (!badge) return;
+  const n = _approveList.length;
+  badge.textContent = n > 99 ? '99+' : String(n);
+  badge.style.display = n > 0 ? 'block' : 'none';
+}
+
+function renderApproveList() {
+  const area = document.getElementById('approveListArea');
+  if (!area) return;
+  updateApproveTabCount();
+  if (_approveList.length === 0) {
+    area.innerHTML = emptyStateHtml('✅ Tidak ada yang perlu di-approve');
+    return;
+  }
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+
+  // Dikelompokkan per Lokasi Site -> Pihak Penyewa (bukan per tipe unit lagi)
+  // supaya approver bisa lihat per lokasi/penyewa tanpa semuanya campur —
+  // semua item tetap tampil, cuma disusun per section. Tipe unit tetap
+  // kelihatan sebagai label di tiap baris item.
+  // item bawa idx ASLI (posisi di _approveList), supaya openApproveDetail(idx)/
+  // confirmApprove(idx) tetap tepat sasaran walau urutan tampilan berubah
+  // karena grouping.
+  const groups = {}; // { lokasi: { penyewa: [ {item, idx}, ... ] } }
+  _approveList.forEach((item, idx) => {
+    const r = item.row || {};
+    const lok = (r['Lokasi Site']  || '').trim() || 'Lokasi Belum Diketahui';
+    const pen = (r['Pihak Penyewa'] || '').trim() || 'Pihak Belum Diketahui';
+    if (!groups[lok]) groups[lok] = {};
+    if (!groups[lok][pen]) groups[lok][pen] = [];
+    groups[lok][pen].push({ item, idx });
+  });
+
+  // Section Lokasi Site & Pihak Penyewa tampil sebagai header collapsible —
+  // unit di dalamnya baru muncul kalau headernya diklik/dibuka. Supaya
+  // pengawas bisa fokus approve per lokasi/penyewa satu-satu tanpa daftar
+  // penuh langsung numpuk. _apvOpenSet nyimpen key yang lagi terbuka biar
+  // state-nya nggak balik nutup tiap kali renderApproveList() dipanggil ulang.
+  let html = '';
+  Object.keys(groups).sort().forEach(lok => {
+    const penGroups = groups[lok];
+    const lokTotal = Object.values(penGroups).reduce((n, arr) => n + arr.length, 0);
+    const lokKey = 'L::' + lok;
+    const lokOpen = !_apvClosedLokSet.has(lokKey);
+    html += `
+      <div class="apv-lok-h${lokOpen ? ' open' : ''}" onclick="toggleApvLok('${escJs(lokKey)}')">
+        <span>📍 ${lok} (${lokTotal})</span>
+        <span class="chev">›</span>
+      </div>
+      <div class="apv-lok-body${lokOpen ? ' open' : ''}">`;
+    Object.keys(penGroups).sort().forEach(pen => {
+      const rows = penGroups[pen];
+      const penKey = 'P::' + lok + '::' + pen;
+      const penOpen = _apvOpenSet.has(penKey);
+      html += `
+        <div class="apv-pen-h${penOpen ? ' open' : ''}" onclick="toggleApvGroup('${escJs(penKey)}')">
+          <span>${pen} (${rows.length})</span>
+          <span class="chev">›</span>
+        </div>
+        <div class="apv-pen-body${penOpen ? ' open' : ''}">`;
+      const typeOrder = ['dt', 'exa', 'gdv', 'lv'];
+      const byType = {};
+      rows.forEach(row => {
+        const t = row.item.unitType;
+        if (!byType[t]) byType[t] = [];
+        byType[t].push(row);
+      });
+      typeOrder.filter(t => byType[t]).forEach(t => {
+        html += `<div class="apv-type-h">${unitLabel[t] || t} (${byType[t].length})</div>`;
+        byType[t].forEach(({ item, idx }) => {
+          const r = item.row;
+          const cfg = FORMS[item.unitType];
+          const nama = cfg ? (r[cfg.namaField] || '-') : '-';
+          html += `
+            <div class="hist-item" onclick="openApproveDetail(${idx})" style="cursor:pointer">
+              <div class="status-dot pending"></div>
+              <div class="hist-item-info">
+                <div class="unit">${r['ID Unit'] || '-'} · ${unitLabel[item.unitType] || item.unitType}</div>
+                <div class="meta-nama">${nama}</div>
+                <div class="meta">${r['Tanggal P2H'] || '-'} · Jam: ${r['Jam Pengisian P2H'] || '-'}</div>
+              </div>
+              <div style="color:var(--muted);font-size:16px;align-self:center">›</div>
+            </div>`;
+        });
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  area.innerHTML = html;
+}
+
+// Lokasi Site default TERBUKA (langsung kelihatan daftar penyewanya) —
+// _apvClosedLokSet nyimpen key lokasi yang SUDAH DITUTUP manual oleh pengawas.
+// Pihak Penyewa default TERTUTUP (unit baru muncul kalau diklik) —
+// _apvOpenSet nyimpen key penyewa yang SUDAH DIBUKA manual.
+// Keduanya dipertahankan lintas render supaya klik pengawas nggak ke-reset
+// pas list di-refresh (mis. abis approve satu unit).
+const _apvClosedLokSet = new Set();
+const _apvOpenSet = new Set();
+function toggleApvLok(key) {
+  if (_apvClosedLokSet.has(key)) _apvClosedLokSet.delete(key);
+  else _apvClosedLokSet.add(key);
+  renderApproveList();
+}
+function toggleApvGroup(key) {
+  if (_apvOpenSet.has(key)) _apvOpenSet.delete(key);
+  else _apvOpenSet.add(key);
+  renderApproveList();
+}
+function escJs(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function openApproveDetail(idx) {
+  const item = _approveList[idx];
+  if (!item) return;
+  const r = item.row;
+  const cfg = FORMS[item.unitType];
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const nama = cfg ? (r[cfg.namaField] || '-') : '-';
+  const total = cfg ? cfg.items.length : 0;
+  let done = 0, rusak = 0;
+  let chkHtml = '<div class="modal-chk-list">';
+  if (cfg) {
+    cfg.items.forEach((it, i) => {
+      if (cfg.sectionBreaks && cfg.sectionBreaks[i]) {
+        chkHtml += `<div class="modal-section-lbl">${cfg.sectionBreaks[i].icon} ${cfg.sectionBreaks[i].label}</div>`;
+      }
+      const val = r[it] || '';
+      if (val !== '') done++;
+      if (String(val).startsWith('Rusak')) rusak++;
+      const cls = val === 'Baik' ? 'ok' : String(val).startsWith('Rusak') ? 'nok' : 'empty';
+      chkHtml += `
+        <div class="modal-chk-row ${cls}">
+          <div class="modal-chk-num">${i+1}</div>
+          <div class="modal-chk-text">${it}</div>
+          <div class="modal-chk-badge ${cls}">${val || '—'}</div>
+        </div>`;
+    });
+  }
+  chkHtml += '</div>';
+
+  document.getElementById('detailTitle').textContent = `${item.p2hId} · ${unitLabel[item.unitType] || item.unitType}`;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="modal-meta">
+      <div class="modal-meta-item"><div class="lbl">P2H ID</div><div class="val" style="font-size:11px">${item.p2hId}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Tanggal</div><div class="val">${r['Tanggal P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Jam Mulai</div><div class="val">${r['Jam Pengisian P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Jam Selesai P2H</div><div class="val">${r['Jam Selesai P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Durasi P2H</div><div class="val">${r['Durasi P2H'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Driver/Operator</div><div class="val">${nama}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Lokasi Site</div><div class="val">${r['Lokasi Site'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Pihak Penyewa</div><div class="val">${r['Pihak Penyewa'] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">${cfg?.hmLabel || 'HM/KM'}</div><div class="val">${r[cfg?.hmLabel] || '-'}</div></div>
+      <div class="modal-meta-item"><div class="lbl">Checklist</div><div class="val">${done}/${total} item</div></div>
+      <div class="modal-meta-item"><div class="lbl">Item Rusak</div><div class="val" style="color:${rusak>0?'var(--nok)':'var(--ok)'}">${rusak} item</div></div>
+    </div>
+    ${r['Keterangan Pengecekan'] ? `<div style="background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2)"><b>Keterangan:</b> ${r['Keterangan Pengecekan']}</div>` : ''}
+    ${r['Tindakan'] ? `<div style="background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2)"><b>Tindakan:</b> ${r['Tindakan']}</div>` : ''}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Detail Checklist</div>
+    ${chkHtml}
+    <button id="approveActionBtn" class="save-btn" style="margin-top:14px" onclick="confirmApprove(${idx})">
+      ✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}
+    </button>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+let _pendingApproveIdx = null;
+function confirmApprove(idx) {
+  const item = _approveList[idx];
+  if (!item) return;
+  _pendingApproveIdx = idx;
+  document.getElementById('confirmApproveText').textContent =
+    `Approve unit ${item.row['ID Unit'] || '-'} sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}? Data langsung masuk ke spreadsheet.`;
+  document.getElementById('confirmApproveModal').classList.add('show');
+}
+function closeConfirmApprove() {
+  document.getElementById('confirmApproveModal').classList.remove('show');
+  _pendingApproveIdx = null;
+}
+
+async function doApprove() {
+  const idx = _pendingApproveIdx;
+  closeConfirmApprove();
+  if (idx === null || idx === undefined) return;
+  const item = _approveList[idx];
+  if (!item) return;
+  if (!GAS_URL) { toast('⚠ URL GAS belum diset', 'err'); return; }
+
+  const btn = document.getElementById('approveActionBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'approveP2H',
+        data: {
+          sheetName: item.sheetName,
+          p2hId: item.p2hId,
+          role: approverAuth.jabatan,
+          nama: approverAuth.nama,
+          password: APPROVAL_PASSWORDS[approverAuth.jabatan]
+        }
+      }),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      redirect: 'follow'
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
+
+    if (json.status === 'ok') {
+      toast(json.already ? ('⚠ Sudah pernah di-approve oleh: ' + json.existingNama) : '✅ Berhasil di-approve', json.already ? '' : 'ok');
+      closeDetailModal();
+      if (!json.already) {
+        // Update ringkasan "sudah disetujui hari ini" seketika — tanpa ini,
+        // ringkasan cuma ke-update saat fetchApprovalList() jalan lagi
+        // (buka halaman Approve dari awal / auto-refresh berikutnya).
+        const now = new Date();
+        const pad2 = n => String(n).padStart(2, '0');
+        _approvedTodayList.push({
+          idUnit: item.row['ID Unit'] || '-',
+          waktu:  `${pad2(now.getHours())}:${pad2(now.getMinutes())}`,
+          unitType: item.unitType,
+          checklistSummary: computeChecklistSummary(item.row, item.unitType)
+        });
+        // Cache riwayat jadi basi karena ada approval baru — paksa fetch ulang
+        // saat tab Riwayat dibuka lagi, supaya item ini langsung muncul di sana.
+        _approveHistoryLoaded = false;
+      }
+      _approveList.splice(idx, 1);
+      renderApproveList();
+      updateApproveBadge();
+    } else {
+      toast('❌ ' + (json.message || 'Gagal approve'), 'err');
+      if (btn) { btn.disabled = false; btn.innerHTML = `✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}`; }
+    }
+  } catch (e) {
+    toast('❌ ' + e.message, 'err');
+    if (btn) { btn.disabled = false; btn.innerHTML = `✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}`; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
 // HISTORY
 // ══════════════════════════════════════════════════════════
 async function renderHistory() {
@@ -2785,6 +4262,7 @@ function updateOnlineStatus() {
 (async () => {
   await initDB();
   await loadSettings();
+  await loadApproverAuth();
   await loadMasterUnitFromCache();
   updateStats();
   updateOnlineStatus();
@@ -2821,6 +4299,8 @@ function updateOnlineStatus() {
   setTimeout(() => tryAutoSync('app-init'), 2000);
   // Coba refresh Master Unit dari sheet di background (diam-diam, tidak toast kalau gagal)
   setTimeout(() => syncMasterUnit(false), 2500);
+  // Kalau device ini sudah login sebagai approver, cek jumlah pending di background
+  setTimeout(() => silentRefreshApproveBadge(), 3000);
 
   // Daftarkan Service Worker (sw.js) supaya app shell ke-cache dan bisa
   // dibuka tanpa internet setelah pertama kali diakses online.
