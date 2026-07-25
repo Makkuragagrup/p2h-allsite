@@ -2515,7 +2515,16 @@ async function submitForm() {
     updateStats();
     updateSyncBadge();
     goHome();
-    setTimeout(() => { syncAll(); }, 500);
+    // FIX 6: JANGAN panggil syncAll() langsung di sini — syncAll() tidak cek
+    // konektivitas dulu, jadi kalau operator submit saat benar-benar offline
+    // (kasus paling umum di lapangan), percobaan ini pasti gagal dan bikin
+    // record kena status 'error' + backoff (1m→5m→15m→1jam). Kalau sinyal baru
+    // masuk sebelum jadwal backoff itu lewat, auto-sync yang lain (online-event/
+    // polling/visibility) ikut menunggu jadwal yang sama — operator jadi harus
+    // klik Sync manual (yang tidak peduli backoff) padahal jaringan sudah ada.
+    // tryAutoSync() sudah ping isGASReachable() dulu sebelum syncAll() dipanggil,
+    // jadi tidak ada percobaan sia-sia yang meracuni jadwal retry.
+    setTimeout(() => { tryAutoSync('after-submit'); }, 500);
   } catch(e) {
     toast('❌ Gagal simpan: ' + e.message, 'err');
     btn.disabled = false;
