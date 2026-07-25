@@ -4230,9 +4230,13 @@ function setupPolling() {
       setTimeout(() => tryAutoSync('polling-reconnect'), 1500);
     }
     _lastOnlineState = nowOnline;
-    if (nowOnline) {
-      await tryAutoSync('polling-interval');
-    }
+    // FIX 5: JANGAN gate pemanggilan tryAutoSync dengan navigator.onLine di sini.
+    // navigator.onLine bisa nyangkut 'false' di Android WebView / sinyal lemah
+    // (lihat komentar FIX 3 di isGASReachable), padahal polling 30 detik ini
+    // justru dibuat SEBAGAI BACKUP untuk kondisi itu. tryAutoSync() sendiri sudah
+    // melakukan ping aktual via isGASReachable() sebelum benar-benar sync, jadi
+    // itu yang jadi gate sesungguhnya — bukan navigator.onLine.
+    await tryAutoSync('polling-interval');
   }, 30000);
 }
 
