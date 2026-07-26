@@ -135,7 +135,7 @@ async function syncPendingRecords() {
   }
 }
 
-const CACHE_NAME = 'p2h-shell-v9'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+const CACHE_NAME = 'p2h-shell-v10'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
 const APP_SHELL = [
   './',
   './index.html',
@@ -203,9 +203,27 @@ self.addEventListener('fetch', (event) => {
   // pernah cocok walau app-shell sudah ter-cache dengan benar. Untuk navigasi,
   // kalau network gagal, langsung fallback ke './index.html' dari cache,
   // apa pun URL persisnya — supaya app tetap kebuka waktu full offline.
+  // FIX 10: Cache-first untuk navigasi (bukan network-first).
+  // Sebelumnya fetch() dicoba dulu ke network sebelum fallback ke cache —
+  // di sinyal lemah/menggantung (bukan airplane mode bersih), fetch() bisa
+  // butuh beberapa detik sebelum reject. Selama itu, Chrome/WebAPK punya
+  // timeout navigasi sendiri dan bisa keburu menampilkan halaman default
+  // "Anda offline" SEBELUM .catch() kita sempat jalan. Sekarang: kalau
+  // index.html sudah ada di cache, balas LANGSUNG dari cache (instan, tidak
+  // ada window waktu buat Chrome ambil alih), baru diam-diam update cache
+  // dari network di background (stale-while-revalidate) untuk sesi berikutnya.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('./index.html'))
+      caches.match('./index.html').then((cached) => {
+        const networkFetch = fetch(event.request).then((res) => {
+          if (res && res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', clone));
+          }
+          return res;
+        }).catch(() => cached);
+        return cached || networkFetch;
+      })
     );
     return;
   }
