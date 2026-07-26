@@ -664,7 +664,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
       <button class="refresh-btn" id="masterUnitRefreshBtn" onclick="syncMasterUnit(true)" title="Refresh daftar unit">
         🔄
       </button>
-      <button class="sync-btn" id="syncBtn" onclick="syncAll()">
+      <button class="sync-btn" id="syncBtn" onclick="syncAll('force')">
         ↑ Sync
         <span class="sync-badge" id="syncBadge" style="display:none">0</span>
       </button>
@@ -1526,6 +1526,20 @@ async function syncMasterUnit(showToast) {
 // ── GAS URL (hardcoded) ──
 // GANTI dengan Web App URL dari deployment Code.gs baru Anda (lihat file Code.gs terlampir)
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxqXI73VkH5KJ5gbZJ-BU_9Oi0nSuX_VHfOuMpYH1IJi1VvLUPt4ZYQ64R9oVofnl8/exec';
+
+// FIX 9: Background Sync API — daftarkan tag 'sync-p2h' supaya browser bisa
+// membangunkan service worker untuk kirim data pending WALAU app sudah
+// ditutup total, begitu koneksi nyata kembali. Ini TIDAK didukung semua
+// browser (Chrome/Edge Android: ya. Safari/iOS: TIDAK SAMA SEKALI — di iOS
+// data tetap baru terkirim saat app dibuka lagi, sama seperti sebelumnya).
+// Aman dipanggil berkali-kali; browser dedup berdasarkan nama tag.
+const BG_SYNC_SUPPORTED = ('serviceWorker' in navigator) && ('SyncManager' in window);
+function requestBackgroundSync() {
+  if (!BG_SYNC_SUPPORTED) return; // browser tidak dukung -> diam-diam skip, auto-sync foreground tetap jalan seperti biasa
+  navigator.serviceWorker.ready.then((reg) => reg.sync.register('sync-p2h')).catch((e) => {
+    console.log('[BGSync] Gagal daftar sync tag:', e.message);
+  });
+}
 
 // ── STATE ──
 let currentForm = null;
@@ -2515,6 +2529,7 @@ async function submitForm() {
     updateStats();
     updateSyncBadge();
     goHome();
+    requestBackgroundSync(); // FIX 9: jaga-jaga app ditutup sebelum sempat sync
     // FIX 6: JANGAN panggil syncAll() langsung di sini — syncAll() tidak cek
     // konektivitas dulu, jadi kalau operator submit saat benar-benar offline
     // (kasus paling umum di lapangan), percobaan ini pasti gagal dan bikin
@@ -2794,9 +2809,13 @@ async function retrySingleCore(rec, localId) {
 // Sekarang: retry otomatis 1 menit → 5 menit → 15 menit → 60 menit → berhenti.
 const RETRY_DELAYS_MS = [60000, 300000, 900000, 3600000]; // 1m, 5m, 15m, 1jam
 
-function shouldRetryRecord(rec) {
+function shouldRetryRecord(rec, force) {
   if (rec.status === 'pending') return true;
   if (rec.status === 'error') {
+    // FIX 8: kalau ini klik manual (force), abaikan jadwal backoff & batas
+    // max-retry sepenuhnya — operator klik Sync artinya "coba sekarang",
+    // bukan "coba kalau sudah waktunya menurut jadwal otomatis".
+    if (force) return true;
     const retryCount = rec.retryCount || 0;
     if (retryCount >= RETRY_DELAYS_MS.length) return false; // sudah max retry
     const nextRetryAt = rec.nextRetryAt || 0;
@@ -2806,15 +2825,16 @@ function shouldRetryRecord(rec) {
 }
 
 async function syncAll() {
+  const forced = arguments[0] === 'force';
   if (!GAS_URL) { toast('⚠ URL GAS belum diset', 'err'); return; }
-  if (_isSyncing && arguments[0] !== 'force') { toast('⏳ Sedang sync, harap tunggu...', ''); return; }
+  if (_isSyncing && !forced) { toast('⏳ Sedang sync, harap tunggu...', ''); return; }
 
   _isSyncing = true;
   const btn = document.getElementById('syncBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sync...'; }
 
   const records = await dbGetAll('records');
-  const toSync = records.filter(shouldRetryRecord);
+  const toSync = records.filter((r) => shouldRetryRecord(r, forced));
 
   if (toSync.length === 0) {
     toast('✅ Semua data tersync', 'ok');
@@ -2884,7 +2904,7 @@ async function syncAll() {
   updateSyncBadge();
   updateStats();
   if (failed === 0) toast(`✅ ${success} data tersync ke Sheets`, 'ok');
-  else toast(`⚠ ${success} berhasil, ${failed} gagal (auto-retry aktif)`, 'err');
+  else { toast(`⚠ ${success} berhasil, ${failed} gagal (auto-retry aktif)`, 'err'); requestBackgroundSync(); }
   _isSyncing = false;
 }
 
@@ -4206,7 +4226,7 @@ async function tryAutoSync(source) {
   if (!pending) return;
   // Gunakan ping aktual, bukan navigator.onLine
   const reachable = await isGASReachable();
-  if (!reachable) return;
+  if (!reachable) { requestBackgroundSync(); return; } // FIX 9: jaring pengaman kalau app ditutup sebelum online lagi
 
   // FIX 4: JANGAN set _isSyncing di sini — syncAll() sudah mengunci dirinya
   // sendiri (baris guard "if (_isSyncing...) return"). Kalau di-set di sini
