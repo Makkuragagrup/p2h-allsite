@@ -207,6 +207,8 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   position:relative; overflow:hidden;
 }
 .unit-card:active { transform:scale(0.97); }
+.rekap-type-card { transition:border-color .15s, box-shadow .15s, transform .1s; }
+.rekap-type-card:active { transform:scale(0.97); border-color:var(--accent); }
 .unit-card:hover  { border-color:var(--accent); box-shadow:0 4px 12px rgba(216,90,48,.15); }
 .unit-card-stripe {
   position:absolute; top:0; left:0; right:0; height:3px;
@@ -413,6 +415,10 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   background:rgba(0,0,0,.45); z-index:200;
   align-items:flex-end; justify-content:center;
 }
+/* detailModal bisa dibuka DI ATAS rekapTypeModal (lihat openRekapUnitDetail) —
+   z-index lebih tinggi supaya keduanya tetap tumpuk kelihatan, rekapTypeModal
+   di belakang tidak perlu ditutup dan tetap ada begitu detailModal ditutup. */
+#detailModal { z-index:260; }
 .modal-overlay.show { display:flex; }
 .modal-box {
   background:var(--white); border-radius:20px 20px 0 0;
@@ -845,6 +851,18 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
       <button class="modal-close" onclick="closeDetailModal()">✕ Tutup</button>
     </div>
     <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL REKAP PER TIPE UNIT -->
+<div class="modal-overlay" id="rekapTypeModal" onclick="closeRekapType(event)">
+  <div class="modal-box" id="rekapTypeBox">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="rekapTypeTitle">Detail Unit</h3>
+      <button class="modal-close" onclick="closeRekapTypeModal()">✕ Tutup</button>
+    </div>
+    <div class="modal-body" id="rekapTypeBody"></div>
   </div>
 </div>
 
@@ -1656,8 +1674,16 @@ let _approveHistory = { dt: [], exa: [], gdv: [], lv: [] }; // cache getApproval
 let _approveHistoryDetailCache = {}; // { 'sheetName|p2hId': row } — cache detail on-demand per sesi, biar klik ulang item yang sama tidak fetch lagi
 let _approveHistoryFlat = []; // gabungan semua tipe urut tampil, supaya index klik konsisten dgn openApproveHistoryDetail
 let _approveHistoryLoaded = false; // sudah pernah fetch sekali di sesi Approve ini (biar tab switch tidak fetch ulang tiap klik)
-let _apvHistFrom = ''; // filter rentang tanggal History Approve — format input type=date (yyyy-mm-dd), '' = tidak difilter
-let _apvHistTo   = '';
+// Filter tanggal History Approve — SATU tanggal saja (bukan rentang),
+// format input type=date (yyyy-mm-dd). Default ke HARI INI supaya yang
+// tampil pertama kali dibuka cuma approval hari ini, bukan seluruh
+// riwayat dari awal — user tinggal ganti tanggalnya kalau mau lihat
+// hari lain.
+let _apvHistDate = (() => {
+  const d = new Date();
+  const pad2 = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+})();
 
 // Parse "dd/MM/yyyy" (format kolom Tanggal P2H) -> Date tengah malam, atau null kalau gagal
 function parseTglDDMMYYYY(str) {
@@ -3023,7 +3049,12 @@ function switchApproveTab(tab) {
   document.getElementById('approveTabBtn-history').classList.toggle('active', tab === 'history');
   document.getElementById('approveTabBtn-rekap').classList.toggle('active', tab === 'rekap');
   if (tab === 'pending') {
-    renderApproveList();
+    if (_approveListLoaded) {
+      renderApproveList();
+    } else {
+      document.getElementById('approveListArea').innerHTML = emptyStateHtml('⏳ Memuat data...');
+      fetchApprovalList();
+    }
   } else if (tab === 'history') {
     if (_approveHistoryLoaded) {
       renderApproveHistory();
@@ -3032,7 +3063,12 @@ function switchApproveTab(tab) {
       fetchApprovalHistory();
     }
   } else if (tab === 'rekap') {
-    renderApproveRekap();
+    if (_approveListLoaded) {
+      renderApproveRekap();
+    } else {
+      document.getElementById('approveListArea').innerHTML = emptyStateHtml('⏳ Memuat rekap...');
+      fetchApprovalList();
+    }
     // Tarik data Master Unit terbaru dari sheet dulu (async, tanpa toast),
     // baru render ulang — supaya daftar unit yang tampil bukan fallback basi
     // kalau sync sebelumnya belum sempat kelar (mis. baru buka app).
@@ -3070,29 +3106,70 @@ function getSubmittedTodaySet() {
   return set;
 }
 
+// BARU — nama driver/operator yang ngisi P2H hari ini, per ID Unit.
+// Sumbernya sama dengan getSubmittedTodaySet() (_approveList +
+// _approvedTodayList), tinggal ambil field nama sesuai tipe unitnya
+// (FORMS[type].namaField — 'Nama Lengkap Driver' utk dt/lv, 'Nama
+// Lengkap Operator' utk exa/gdv). Kalau satu unit sempat diisi lebih
+// dari sekali hari ini, yang dipakai adalah entri TERAKHIR yang diproses
+// (urutan _approveList lalu _approvedTodayList) — cukup akurat untuk
+// keperluan tampilan Rekap Harian, bukan laporan resmi per-submission.
+function getSubmittedTodayNameMap() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const map = new Map();
+  (_approveList || []).forEach(item => {
+    const r = (item && item.row) || {};
+    const d = parseTglDDMMYYYY(r['Tanggal P2H']);
+    if (d && d.getTime() === today.getTime()) {
+      const cfg = FORMS[item.unitType];
+      const nama = (cfg && r[cfg.namaField]) ? String(r[cfg.namaField]).trim() : '';
+      if (nama) map.set(String(r['ID Unit'] || '').trim(), nama);
+    }
+  });
+  (_approvedTodayList || []).forEach(it => {
+    if (!it || !it.idUnit) return;
+    const cfg = FORMS[it.unitType];
+    const r = it.row || {};
+    const nama = (cfg && r[cfg.namaField]) ? String(r[cfg.namaField]).trim() : '';
+    if (nama) map.set(String(it.idUnit).trim(), nama);
+  });
+  return map;
+}
+
 // Filter Pihak Penyewa untuk tab Rekap Harian (in-app, bukan PDF) — pakai
 // key yang sama dengan PENYEWA_GROUPS supaya konsisten dengan pilihan
 // Download PDF. 'all' = tampilkan semua penyewa tanpa filter.
 let _rekapPenyewaFilter = 'all';
+// Tipe unit yang modal detailnya sedang terbuka di Rekap Harian (mis. 'dt') —
+// null kalau modal sedang tertutup. Dipakai supaya modal bisa di-refresh
+// in-place setelah approve, bukan hilang ditutup begitu saja.
+let _rekapTypeModalOpen = null;
 function setRekapPenyewaFilter(key) {
   _rekapPenyewaFilter = key;
   renderApproveRekap();
 }
 
-// Lokasi & Penyewa default TERBUKA di tab Rekap Harian (beda dari tab
-// Menunggu yang default tertutup) — di sini fungsinya untuk lihat status
-// sekilas, jadi tidak perlu diklik dulu. Set ini cuma nyimpen yang SUDAH
-// DITUTUP manual, supaya state-nya nggak balik kebuka tiap render ulang.
+// Lokasi Site default TERBUKA di tab Rekap Harian (beda dari tab Menunggu
+// yang default tertutup) — supaya langsung kelihatan daftar Pihak Penyewa
+// per lokasi tanpa harus klik dulu. Set ini cuma nyimpen yang SUDAH DITUTUP
+// manual, supaya state-nya nggak balik kebuka tiap render ulang.
+//
+// Pihak Penyewa sebaliknya default TERTUTUP — begitu dibuka pertama kali,
+// rincian tipe unit & ID unit satu-satu TIDAK langsung tampil semua; harus
+// diklik dulu per baris Pihak Penyewa. Makanya di sini pakai OPEN-set
+// (bukan closed-set) — hanya key yang pernah diklik manual yang masuk ke
+// dalamnya dan jadi terbuka.
 const _rekapClosedLokSet = new Set();
-const _rekapClosedPenSet = new Set();
+const _rekapOpenPenSet = new Set();
 function toggleRekapLok(key) {
   if (_rekapClosedLokSet.has(key)) _rekapClosedLokSet.delete(key);
   else _rekapClosedLokSet.add(key);
   renderApproveRekap();
 }
 function toggleRekapPen(key) {
-  if (_rekapClosedPenSet.has(key)) _rekapClosedPenSet.delete(key);
-  else _rekapClosedPenSet.add(key);
+  if (_rekapOpenPenSet.has(key)) _rekapOpenPenSet.delete(key);
+  else _rekapOpenPenSet.add(key);
   renderApproveRekap();
 }
 
@@ -3114,6 +3191,7 @@ function renderApproveRekap() {
   const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
   const order = ['dt', 'exa', 'gdv', 'lv'];
   const submitted = getSubmittedTodaySet();
+  const nameMap = getSubmittedTodayNameMap();
 
   // Saring dulu unit per tipe sesuai pill Pihak Penyewa yang aktif — dipakai
   // BERSAMA oleh kartu ringkasan atas maupun grouping Lokasi/Penyewa di
@@ -3152,8 +3230,11 @@ function renderApproveRekap() {
     const { sudah, belum, total } = perType[t];
     if (total === 0) return;
     html += `
-      <div style="flex:1 1 calc(50% - 4px);min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">${unitLabel[t]} (${total})</div>
+      <div class="rekap-type-card" style="flex:1 1 calc(50% - 4px);min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer" onclick="openRekapTypeDetail('${t}')">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:11px;font-weight:700;color:var(--text2)">${unitLabel[t]} (${total})</div>
+          <span style="font-size:11px;color:var(--muted)">›</span>
+        </div>
         <div style="display:flex;gap:6px">
           <div style="flex:1;background:var(--ok-lt);border-radius:8px;padding:6px;text-align:center">
             <div style="font-size:16px;font-weight:800;color:var(--ok)">${sudah}</div>
@@ -3218,7 +3299,7 @@ function renderApproveRekap() {
       const byType = penGroups[pen];
       const penTotal = Object.values(byType).reduce((n, arr) => n + arr.length, 0);
       const penKey = 'RP::' + lok + '::' + pen;
-      const penOpen = !_rekapClosedPenSet.has(penKey);
+      const penOpen = _rekapOpenPenSet.has(penKey);
       html += `
         <div class="apv-pen-h${penOpen ? ' open' : ''}" onclick="toggleRekapPen('${escJs(penKey)}')">
           <span>${pen} (${penTotal})</span>
@@ -3230,13 +3311,18 @@ function renderApproveRekap() {
         html += `<div class="apv-type-h">${unitLabel[t]} (${byType[t].length}) — ✅ ${sudahType} · ⏳ ${byType[t].length - sudahType}</div>`;
         byType[t].forEach(u => {
           const done = submitted.has(u);
+          const nama = nameMap.get(u);
+          const metaText = done
+            ? ('✅ Sudah P2H' + (nama ? ' — ' + nama : ' hari ini'))
+            : '⏳ Belum P2H hari ini';
           html += `
-            <div class="hist-item" style="cursor:default">
+            <div class="hist-item" ${done ? `onclick="openRekapUnitDetail('${escJs(u)}')" style="cursor:pointer"` : 'style="cursor:default"'}>
               <div class="status-dot ${done ? 'synced' : 'pending'}"></div>
               <div class="hist-item-info">
                 <div class="unit">${u}</div>
-                <div class="meta">${done ? '✅ Sudah P2H hari ini' : '⏳ Belum P2H hari ini'}</div>
+                <div class="meta">${metaText}</div>
               </div>
+              ${done ? `<div style="color:var(--muted);font-size:16px;align-self:center">›</div>` : ''}
             </div>`;
         });
       });
@@ -3249,6 +3335,105 @@ function renderApproveRekap() {
 }
 
 // ══════════════════════════════════════════════════════════
+// MODAL DETAIL REKAP PER TIPE UNIT
+// Diklik dari kartu ringkasan (Dump Truck/Excavator/dll) di tab Rekap
+// Harian, supaya langsung kelihatan siapa saja yang Sudah/Belum P2H
+// untuk tipe itu tanpa harus scroll cari di daftar Lokasi->Penyewa di
+// bawahnya. Menghormati pill filter Pihak Penyewa (_rekapPenyewaFilter)
+// yang sedang aktif, sama seperti kartu ringkasan & grouping di bawah.
+// ══════════════════════════════════════════════════════════
+function openRekapTypeDetail(t) {
+  _rekapTypeModalOpen = t;
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const submitted = getSubmittedTodaySet();
+  const nameMap = getSubmittedTodayNameMap();
+
+  const units = (UNIT_OPTIONS[t] || []).filter(u => {
+    if (_rekapPenyewaFilter === 'all') return true;
+    const { penyewa } = getUnitLokasiPenyewa(u);
+    const grp = PENYEWA_GROUPS[_rekapPenyewaFilter];
+    return grp && grp.match.includes(normPenyewa(penyewa));
+  });
+
+  const belumList = [];
+  const sudahList = [];
+  units.forEach(u => {
+    const { lokasi, penyewa } = getUnitLokasiPenyewa(u);
+    const item = { u, lokasi: lokasi && lokasi !== '-' ? lokasi : 'Lokasi Belum Diketahui', penyewa: penyewa && penyewa !== '-' ? penyewa : 'Pihak Belum Diketahui' };
+    if (submitted.has(u)) sudahList.push(item); else belumList.push(item);
+  });
+  belumList.sort((a, b) => a.u.localeCompare(b.u));
+  sudahList.sort((a, b) => a.u.localeCompare(b.u));
+
+  document.getElementById('rekapTypeTitle').textContent = `${unitLabel[t] || t} — ${units.length} Unit`;
+
+  const renderItem = (item, done) => {
+    const nama = done ? nameMap.get(item.u) : '';
+    return `
+    <div class="hist-item" ${done ? `onclick="openRekapUnitDetail('${escJs(item.u)}')" style="cursor:pointer"` : 'style="cursor:default"'}>
+      <div class="status-dot ${done ? 'synced' : 'pending'}"></div>
+      <div class="hist-item-info">
+        <div class="unit">${item.u}</div>
+        <div class="meta">${item.lokasi} · ${item.penyewa}${nama ? ' · ' + nama : ''}</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;white-space:nowrap;color:${done ? 'var(--ok)' : 'var(--nok)'}">${done ? '✅ Sudah' : '⏳ Belum'}</div>
+      ${done ? `<div style="color:var(--muted);font-size:16px;align-self:center">›</div>` : ''}
+    </div>`;
+  };
+
+  let body = `<div style="font-size:11px;color:var(--muted);margin-bottom:10px">✅ Sudah: ${sudahList.length} &nbsp;·&nbsp; ⏳ Belum: ${belumList.length}</div>`;
+  if (units.length === 0) {
+    body += emptyStateHtml('Tidak ada unit untuk pilihan penyewa ini');
+  } else {
+    if (belumList.length) {
+      body += `<div class="apv-type-h" style="padding-left:2px">⏳ BELUM P2H (${belumList.length})</div>`;
+      body += belumList.map(item => renderItem(item, false)).join('');
+    }
+    if (sudahList.length) {
+      body += `<div class="apv-type-h" style="padding-left:2px;margin-top:8px">✅ SUDAH P2H (${sudahList.length})</div>`;
+      body += sudahList.map(item => renderItem(item, true)).join('');
+    }
+  }
+  document.getElementById('rekapTypeBody').innerHTML = body;
+  document.getElementById('rekapTypeModal').classList.add('show');
+}
+function closeRekapTypeModal() {
+  _rekapTypeModalOpen = null;
+  document.getElementById('rekapTypeModal').classList.remove('show');
+}
+function closeRekapType(e) {
+  if (e.target === document.getElementById('rekapTypeModal')) closeRekapTypeModal();
+}
+
+// ══════════════════════════════════════════════════════════
+// DETAIL KERUSAKAN/KENDALA UNIT — diklik dari baris "✅ Sudah" di modal
+// Rekap Harian per tipe unit. Dua kemungkinan sumber data:
+// 1. Unit masih PENDING approve -> row lengkap masih ada di _approveList,
+//    jadi langsung pakai modal detail approve yang sudah ada (openApproveDetail),
+//    lengkap dengan tombol Approve.
+// 2. Unit SUDAH di-approve hari ini (role aktif) -> row lengkap sudah
+//    dibuang dari memori, cuma tersisa ringkasan checklist
+//    (computeChecklistSummary, disimpan saat approve). Tampilkan ringkasan
+//    itu saja (daftar komponen rusak, keterangan, tindakan) tanpa tombol
+//    Approve karena sudah selesai.
+// ══════════════════════════════════════════════════════════
+function openRekapUnitDetail(u) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const idx = (_approveList || []).findIndex(item => {
+    const r = (item && item.row) || {};
+    const d = parseTglDDMMYYYY(r['Tanggal P2H']);
+    return d && d.getTime() === today.getTime() && String(r['ID Unit'] || '').trim() === u;
+  });
+  if (idx >= 0) {
+    openApproveDetail(idx, true);
+    return;
+  }
+
+  toast('✅ Sudah di-approve', 'ok');
+}
+
+// ══════════════════════════════════════════════════════════
 // DOWNLOAD PDF — REKAP HARIAN
 // Cetak lewat dialog print browser (window.print), bukan library PDF
 // terpisah, supaya tetap ringan & jalan offline di PWA ini. User tinggal
@@ -3256,19 +3441,35 @@ function renderApproveRekap() {
 // ══════════════════════════════════════════════════════════
 
 // Cari Lokasi Site & Pihak Penyewa untuk satu ID Unit.
-// Prioritas 1: data submission P2H HARI INI (kalau masih pending di
-// _approveList milik role aktif) — paling akurat karena diisi operator
+// Prioritas 1: data submission P2H HARI INI yang masih pending di
+// _approveList milik role aktif — paling akurat karena diisi operator
 // saat itu juga.
-// Prioritas 2: UNIT_META dari sheet "Master Unit" (assignment tetap unit
-// itu) — dipakai juga untuk unit yang BELUM P2H hari ini, karena untuk
-// unit itu tidak ada data submission sama sekali.
-// Kalau keduanya tidak ada (mis. Code.gs belum kirim unitMeta), balik '-'.
+// Prioritas 2 — FIX: data submission P2H HARI INI yang SUDAH di-approve
+// (_approvedTodayList, field `row` — lihat Code.gs & doApprove()). Dulu
+// tidak dicek sama sekali, jadi begitu unit di-approve dan hilang dari
+// _approveList, fungsi ini langsung lompat ke UNIT_META (Prioritas 3) —
+// kalau Lokasi/Penyewa di Master Unit beda dari yang dipilih operator
+// saat submit (mis. unit dipindah sementara ke site lain hari itu), unit
+// itu tampak "pindah kelompok" di Rekap Harian tepat sesaat setelah
+// di-approve, padahal datanya sendiri tidak berubah. Sekarang submission
+// asli tetap jadi sumber utama baik sebelum maupun sesudah approve.
+// Prioritas 3: UNIT_META dari sheet "Master Unit" (assignment tetap unit
+// itu) — dipakai HANYA untuk unit yang BELUM P2H sama sekali hari ini,
+// karena untuk unit itu tidak ada data submission apa pun.
+// Kalau semuanya tidak ada (mis. Code.gs belum kirim unitMeta), balik '-'.
 function getUnitLokasiPenyewa(idUnit) {
   const pending = (_approveList || []).find(item => item && item.row && String(item.row['ID Unit'] || '').trim() === idUnit);
   if (pending) {
     return {
       lokasi:  normLokasi(pending.row['Lokasi Site']),
       penyewa: pending.row['Pihak Penyewa'] || '-'
+    };
+  }
+  const approved = (_approvedTodayList || []).find(it => it && it.row && String(it.idUnit || '').trim() === idUnit);
+  if (approved) {
+    return {
+      lokasi:  normLokasi(approved.row['Lokasi Site']),
+      penyewa: approved.row['Pihak Penyewa'] || '-'
     };
   }
   const meta = UNIT_META[idUnit];
@@ -3330,8 +3531,22 @@ function getUnitChecklistSummaryToday() {
     }
   });
   (_approvedTodayList || []).forEach(it => {
-    if (it && it.idUnit && it.checklistSummary) {
+    if (!it || !it.idUnit) return;
+    // Prioritas 1: checklistSummary yang sudah dihitung (baik dari
+    // doApprove() di sesi ini, atau nanti kalau backend suatu saat
+    // ikut menghitungnya sendiri).
+    if (it.checklistSummary) {
       map.set(String(it.idUnit).trim(), it.checklistSummary);
+      return;
+    }
+    // Prioritas 2 — FIX: setelah refresh/buka ulang, checklistSummary di
+    // atas sudah tidak ada lagi (state sesi hilang), tapi backend
+    // (getApprovalList) sekarang ikut mengirim `row` + `unitType` mentah
+    // untuk item approved-today (lihat Code.gs). Hitung ulang di sini
+    // supaya rincian rusak/baik & keterangan tetap muncul di PDF/detail
+    // walau bukan sesi yang sama saat approve terjadi.
+    if (it.row && it.unitType) {
+      map.set(String(it.idUnit).trim(), computeChecklistSummary(it.row, it.unitType));
     }
   });
   return map;
@@ -3574,34 +3789,44 @@ function renderApproveHistory() {
   const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
   const order = ['dt', 'exa', 'gdv', 'lv'];
 
-  const fromDate = _apvHistFrom ? new Date(_apvHistFrom + 'T00:00:00') : null;
-  const toDate   = _apvHistTo   ? new Date(_apvHistTo   + 'T00:00:00') : null;
+  const filterDate = _apvHistDate ? new Date(_apvHistDate + 'T00:00:00') : null;
+  const todayYmd = (() => {
+    const d = new Date();
+    const pad2 = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  })();
+  const isToday = _apvHistDate === todayYmd;
+
+  // Batas filter cuma 1 minggu ke belakang (hari ini s/d 6 hari sebelumnya,
+  // total 7 hari) — dipakai sebagai min/max di input tanggal supaya user
+  // tidak bisa pilih tanggal di luar rentang itu lewat date picker sekalipun.
+  const minYmd = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 6);
+    const pad2 = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  })();
 
   const filterBar = `
     <div style="display:flex;gap:8px;align-items:end;padding:2px 2px 14px;flex-wrap:wrap">
       <div style="flex:1;min-width:120px">
-        <label style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px">Dari Tanggal</label>
-        <input type="date" id="apvHistFromInput" value="${_apvHistFrom}" style="width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);background:var(--white)"/>
-      </div>
-      <div style="flex:1;min-width:120px">
-        <label style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px">Sampai Tanggal</label>
-        <input type="date" id="apvHistToInput" value="${_apvHistTo}" style="width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);background:var(--white)"/>
+        <label style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px">Filter Tanggal</label>
+        <input type="date" id="apvHistDateInput" value="${_apvHistDate}" min="${minYmd}" max="${todayYmd}" style="width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);background:var(--white)"/>
       </div>
       <button class="apv-tab-btn" style="flex:0 0 auto;padding:8px 14px" onclick="applyApproveHistoryFilter()">Terapkan</button>
-      ${(_apvHistFrom || _apvHistTo) ? `<button class="apv-tab-btn" style="flex:0 0 auto;padding:8px 14px" onclick="resetApproveHistoryFilter()">✕ Reset</button>` : ''}
+      ${!isToday ? `<button class="apv-tab-btn" style="flex:0 0 auto;padding:8px 14px" onclick="resetApproveHistoryFilter()">Hari Ini</button>` : ''}
     </div>`;
 
-  // Susun & saring dulu — item yang tanggalnya di luar rentang, atau tidak
-  // bisa diparse sama sekali, dibuang dari tampilan (bukan dari data asli).
+  // Susun & saring dulu — item yang tanggalnya bukan tanggal terpilih,
+  // atau tidak bisa diparse sama sekali, dibuang dari tampilan (bukan
+  // dari data asli).
   const groupedFiltered = {};
   order.forEach(t => {
     groupedFiltered[t] = (_approveHistory[t] || []).filter(item => {
-      if (!fromDate && !toDate) return true;
+      if (!filterDate) return true;
       const d = parseTglDDMMYYYY(item.tanggal);
       if (!d) return false;
-      if (fromDate && d < fromDate) return false;
-      if (toDate && d > toDate) return false;
-      return true;
+      return d.getTime() === filterDate.getTime();
     });
   });
 
@@ -3610,7 +3835,7 @@ function renderApproveHistory() {
 
   if (_approveHistoryFlat.length === 0) {
     area.innerHTML = filterBar + emptyStateHtml(
-      (_apvHistFrom || _apvHistTo) ? 'Tidak ada riwayat di rentang tanggal ini' : 'Belum ada riwayat approval'
+      isToday ? 'Belum ada riwayat approval hari ini' : 'Tidak ada riwayat di tanggal ini'
     );
     return;
   }
@@ -3639,18 +3864,32 @@ function renderApproveHistory() {
 }
 
 function applyApproveHistoryFilter() {
-  _apvHistFrom = document.getElementById('apvHistFromInput').value || '';
-  _apvHistTo   = document.getElementById('apvHistToInput').value || '';
-  if (_apvHistFrom && _apvHistTo && _apvHistFrom > _apvHistTo) {
-    toast('⚠ "Dari Tanggal" tidak boleh setelah "Sampai Tanggal"', 'err');
+  const picked = document.getElementById('apvHistDateInput').value || '';
+  if (!picked) { _apvHistDate = picked; renderApproveHistory(); return; }
+
+  // Validasi ulang di JS — atribut min/max di <input type="date"> membatasi
+  // date picker-nya, tapi beberapa browser masih bisa ketik manual di luar
+  // itu, jadi dicek lagi di sini supaya batas 1 minggu benar-benar ditegakkan.
+  const pad2 = n => String(n).padStart(2, '0');
+  const todayD = new Date();
+  const todayYmd = `${todayD.getFullYear()}-${pad2(todayD.getMonth() + 1)}-${pad2(todayD.getDate())}`;
+  const minD = new Date();
+  minD.setDate(minD.getDate() - 6);
+  const minYmd = `${minD.getFullYear()}-${pad2(minD.getMonth() + 1)}-${pad2(minD.getDate())}`;
+
+  if (picked < minYmd || picked > todayYmd) {
+    toast('⚠ Filter tanggal cuma boleh dalam rentang 1 minggu terakhir', 'err');
     return;
   }
+
+  _apvHistDate = picked;
   renderApproveHistory();
 }
 
 function resetApproveHistoryFilter() {
-  _apvHistFrom = '';
-  _apvHistTo = '';
+  const d = new Date();
+  const pad2 = n => String(n).padStart(2, '0');
+  _apvHistDate = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   renderApproveHistory();
 }
 
@@ -3775,6 +4014,10 @@ function renderApproveList() {
   const area = document.getElementById('approveListArea');
   if (!area) return;
   updateApproveTabCount();
+  if (!_approveListLoaded) {
+    area.innerHTML = emptyStateHtml('⏳ Memuat data...');
+    return;
+  }
   if (_approveList.length === 0) {
     area.innerHTML = emptyStateHtml('✅ Tidak ada yang perlu di-approve');
     return;
@@ -3879,7 +4122,7 @@ function escJs(s) {
   return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-function openApproveDetail(idx) {
+function openApproveDetail(idx, viewOnly) {
   const item = _approveList[idx];
   if (!item) return;
   const r = item.row;
@@ -3927,9 +4170,10 @@ function openApproveDetail(idx) {
     ${r['Tindakan'] ? `<div style="background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2)"><b>Tindakan:</b> ${r['Tindakan']}</div>` : ''}
     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Detail Checklist</div>
     ${chkHtml}
+    ${viewOnly ? '' : `
     <button id="approveActionBtn" class="save-btn" style="margin-top:14px" onclick="confirmApprove(${idx})">
       ✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}
-    </button>
+    </button>`}
   `;
   document.getElementById('detailModal').classList.add('show');
 }
@@ -3959,6 +4203,17 @@ async function doApprove() {
   const btn = document.getElementById('approveActionBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
 
+  // FIX — tanpa batas waktu, kalau fetch ke GAS menggantung (mis. deployment
+  // lagi minta re-auth dan diam-diam nyangkut di halaman login Google,
+  // bukan error yang di-throw), tombol "Menyimpan..." bisa nyangkut selamanya
+  // karena baik blok sukses maupun catch(e) di bawah tidak akan pernah
+  // kepanggil. AbortController disini memaksa fetch batal setelah 20 detik,
+  // supaya tombol PASTI balik aktif dan user dapat pesan error yang jelas,
+  // bukan cuma diam menunggu.
+  const _approveTimeoutMs = 20000;
+  const _approveAbort = new AbortController();
+  const _approveTimeoutId = setTimeout(() => _approveAbort.abort(), _approveTimeoutMs);
+
   try {
     const res = await fetch(GAS_URL, {
       method: 'POST',
@@ -3973,11 +4228,29 @@ async function doApprove() {
         }
       }),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      redirect: 'follow'
+      redirect: 'follow',
+      signal: _approveAbort.signal
     });
+    clearTimeout(_approveTimeoutId);
     const text = await res.text();
     let json;
-    try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      // FIX — bedakan pesan: kalau respons berupa HTML (biasanya diawali
+      // '<'), itu ciri khas GAS malah balikin halaman login/consent/error,
+      // bukan JSON — hampir selalu berarti deployment salah versi atau
+      // butuh re-authorize, BUKAN bug di logic approveP2H sendiri. Pesan
+      // generik lama ("Response bukan JSON valid") tidak kasih tahu user
+      // harus ngapain; ini kasih arah yang lebih jelas.
+      const looksLikeHtml = /^\s*</.test(text || '');
+      json = {
+        status: 'error',
+        message: looksLikeHtml
+          ? 'GAS mengembalikan halaman (bukan JSON) — kemungkinan deployment belum di-update ke versi terbaru atau butuh re-authorize. Cek Deploy > Manage deployments.'
+          : 'Response bukan JSON valid'
+      };
+    }
 
     if (json.status === 'ok') {
       toast(json.already ? ('⚠ Sudah pernah di-approve oleh: ' + json.existingNama) : '✅ Berhasil di-approve', json.already ? '' : 'ok');
@@ -3992,6 +4265,7 @@ async function doApprove() {
           idUnit: item.row['ID Unit'] || '-',
           waktu:  `${pad2(now.getHours())}:${pad2(now.getMinutes())}`,
           unitType: item.unitType,
+          row: item.row,
           checklistSummary: computeChecklistSummary(item.row, item.unitType)
         });
         // Cache riwayat jadi basi karena ada approval baru — paksa fetch ulang
@@ -3999,14 +4273,24 @@ async function doApprove() {
         _approveHistoryLoaded = false;
       }
       _approveList.splice(idx, 1);
-      renderApproveList();
+      if (_approveTab === 'rekap') renderApproveRekap();
+      else renderApproveList();
+      if (_rekapTypeModalOpen) openRekapTypeDetail(_rekapTypeModalOpen);
       updateApproveBadge();
     } else {
       toast('❌ ' + (json.message || 'Gagal approve'), 'err');
       if (btn) { btn.disabled = false; btn.innerHTML = `✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}`; }
     }
   } catch (e) {
-    toast('❌ ' + e.message, 'err');
+    clearTimeout(_approveTimeoutId);
+    // FIX — kalau ini timeout (AbortController di atas), e.name === 'AbortError'.
+    // Pesan default browser untuk itu ("The user aborted a request") bikin
+    // bingung karena bukan user yang membatalkan — kasih pesan yang jujur soal
+    // apa yang terjadi (server tidak merespons dalam waktu wajar).
+    const msg = e.name === 'AbortError'
+      ? `Tidak ada respons dari server dalam ${_approveTimeoutMs / 1000} detik — coba lagi, atau cek apakah GAS deployment masih aktif`
+      : e.message;
+    toast('❌ ' + msg, 'err');
     if (btn) { btn.disabled = false; btn.innerHTML = `✅ Approve sebagai ${APPROVAL_ROLES[approverAuth.jabatan].label}`; }
   }
 }
