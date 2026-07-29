@@ -987,6 +987,31 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:'S
   </div>
 </div>
 
+<!-- MODAL PILIH PIHAK PENYEWA UNTUK SALIN CHAT REKAP HARIAN -->
+<div class="confirm-overlay" id="chatPenyewaModal">
+  <div class="confirm-box" style="max-width:320px">
+    <div class="icon">📋</div>
+    <h4>Salin Chat Rekap Harian</h4>
+    <p style="margin-bottom:10px">Pilih pihak penyewa yang mau disalin (masing-masing terpisah, tidak digabung):</p>
+    <select id="chatPenyewaSelect" style="width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--white);margin-bottom:10px">
+      <option value="tas_aas">PT. TAS + PT. AAS</option>
+      <option value="mahligai">MAHLIGAI</option>
+      <option value="nec">PT. NEC</option>
+    </select>
+    <p style="margin-bottom:10px">Kategori unit:</p>
+    <select id="chatTipeSelect" style="width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--white);margin-bottom:14px">
+      <option value="all">Semua Tipe</option>
+      <option value="dt">Dump Truck</option>
+      <option value="exa_gdv">Excavator + Grader/Dozer/Vibro</option>
+      <option value="lv">Light Vehicle</option>
+    </select>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="confirm-ok" style="background:var(--accent)" onclick="copyRekapForSelectedPenyewa()">📋 Salin</button>
+      <button class="confirm-cancel" onclick="closeChatPenyewaModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
 <!-- AREA CETAK — disembunyikan di layar biasa, cuma tampil saat mode print
      (lihat @media print di <style>). Diisi oleh generateRekapPDF() sebelum
      window.print() dipanggil. -->
@@ -1669,6 +1694,7 @@ let approverAuth = null; // { jabatan, nama } setelah berhasil masuk
 let _approveList = [];   // cache hasil terakhir dari GAS untuk halaman Approve
 let _approvedTodayList = []; // ringkasan unit yang sudah di-approve HARI INI (role aktif)
 let _approveListLoaded = false; // sudah pernah selesai fetch _approveList di sesi buka halaman Approve ini — dipakai Rekap Harian supaya tidak nampilin 0 palsu sebelum data asli datang
+let _approveListLastError = null; // FIX BUG "Memuat rekap... tidak terbuka" — pesan error terakhir dari fetchApprovalList() (kalau gagal), supaya Rekap Harian bisa nampilin error + tombol coba lagi, bukan macet di teks loading selamanya
 let _approveTab = 'pending'; // 'pending' | 'history' — tab aktif di halaman Approve
 let _approveHistory = { dt: [], exa: [], gdv: [], lv: [] }; // cache getApprovalHistory (flat per tipe, dipakai openApproveHistoryDetail via index gabungan)
 let _approveHistoryDetailCache = {}; // { 'sheetName|p2hId': row } — cache detail on-demand per sesi, biar klik ulang item yang sama tidak fetch lagi
@@ -3184,7 +3210,20 @@ function renderApproveRekap() {
   // data kosong yang belum sempat terisi. Sekarang tampilkan status memuat
   // dulu selama data pending belum pernah selesai di-fetch sekalipun.
   if (!_approveListLoaded) {
-    area.innerHTML = emptyStateHtml('⏳ Memuat rekap...');
+    // FIX BUG — kalau fetchApprovalList() sudah sempat gagal (network error,
+    // GAS belum deploy/URL salah, dll), dulu di sini tetap nampilin
+    // "⏳ Memuat rekap..." terus-terusan (ketiban ulang oleh syncMasterUnit()
+    // yang jalan barengan di switchApproveTab), padahal fetch-nya sudah
+    // berhenti dan TIDAK auto-retry — kelihatan macet padahal sebenarnya
+    // sudah gagal diam-diam. Sekarang tampilkan errornya + tombol coba lagi.
+    if (_approveListLastError) {
+      area.innerHTML = emptyStateHtml('❌ ' + _approveListLastError) +
+        `<div style="text-align:center;margin-top:10px">
+           <button class="apv-tab-btn" style="padding:8px 16px;font-size:12px" onclick="fetchApprovalList()">🔄 Coba Lagi</button>
+         </div>`;
+    } else {
+      area.innerHTML = emptyStateHtml('⏳ Memuat rekap...');
+    }
     return;
   }
 
@@ -3221,7 +3260,10 @@ function renderApproveRekap() {
   let html = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 2px 10px;gap:8px">
       <div style="font-size:11px;color:var(--muted)">Rekap ${todayStr}</div>
-      <button class="apv-tab-btn" style="flex:0 0 auto;padding:7px 12px;font-size:11px" onclick="openPdfPenyewaModal()">⬇️ Download PDF</button>
+      <div style="display:flex;gap:6px">
+        <button class="apv-tab-btn" style="flex:0 0 auto;padding:7px 12px;font-size:11px" onclick="openChatPenyewaModal()">📋 Salin Chat</button>
+        <button class="apv-tab-btn" style="flex:0 0 auto;padding:7px 12px;font-size:11px" onclick="openPdfPenyewaModal()">⬇️ Download PDF</button>
+      </div>
     </div>`;
 
   // 4 kartu ringkasan, satu per tipe unit — 2 kolom x 2 baris di layar sempit.
@@ -3332,6 +3374,159 @@ function renderApproveRekap() {
   });
 
   area.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════
+// SALIN CHAT REKAP HARIAN (buat tempel langsung ke WA, tanpa PDF)
+// Pakai data & filter Pihak Penyewa yang sama dengan renderApproveRekap()
+// supaya angkanya selalu konsisten dengan yang tampil di layar.
+// ══════════════════════════════════════════════════════════
+const CHAT_TIPE_GROUPS = {
+  all:     { label: 'Semua Tipe',                       types: ['dt', 'exa', 'gdv', 'lv'] },
+  dt:      { label: 'Dump Truck',                        types: ['dt'] },
+  exa_gdv: { label: 'Excavator + Grader/Dozer/Vibro',    types: ['exa', 'gdv'] },
+  lv:      { label: 'Light Vehicle',                     types: ['lv'] }
+};
+
+function buildRekapChatText(groupKey, tipeKey) {
+  // groupKey WAJIB salah satu key PENYEWA_GROUPS ('tas_aas'/'mahligai'/'nec')
+  // — teks Salin Chat selalu per-satu-pihak-penyewa, tidak pernah digabung
+  // jadi satu blok "Semua" seperti tampilan layar.
+  const group = PENYEWA_GROUPS[groupKey];
+  if (!group) return '';
+  const tipeGroup = CHAT_TIPE_GROUPS[tipeKey] || CHAT_TIPE_GROUPS.all;
+
+  const unitLabel = { dt:'Dump Truck', exa:'Excavator', gdv:'Grader/Dozer/Vibro', lv:'Light Vehicle' };
+  const order = tipeGroup.types; // sudah disaring sesuai kategori unit yang dipilih
+  const submitted = getSubmittedTodaySet();
+  const nameMap = getSubmittedTodayNameMap();
+
+  const filteredUnitsByType = {};
+  order.forEach(t => {
+    filteredUnitsByType[t] = (UNIT_OPTIONS[t] || []).filter(u => {
+      const { penyewa } = getUnitLokasiPenyewa(u);
+      return group.match.includes(normPenyewa(penyewa));
+    });
+  });
+
+  const perType = {};
+  order.forEach(t => {
+    let sudah = 0, belum = 0;
+    filteredUnitsByType[t].forEach(u => { if (submitted.has(u)) sudah++; else belum++; });
+    perType[t] = { sudah, belum, total: filteredUnitsByType[t].length };
+  });
+
+  const todayStr = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+  const filterLabel = tipeKey && tipeKey !== 'all' ? `${group.label} — ${tipeGroup.label}` : group.label;
+
+  let text = `*P2H MAKKURAGA GRUP*\n`;
+  text += `Rekap ${todayStr} — ${filterLabel}\n\n`;
+
+  let totSudah = 0, totBelum = 0;
+  order.forEach(t => {
+    const { sudah, belum, total } = perType[t];
+    if (total === 0) return;
+    totSudah += sudah; totBelum += belum;
+    text += `${unitLabel[t]} (${total}) — ✅ ${sudah} Sudah / ❌ ${belum} Belum\n`;
+  });
+  text += `\n*Total: ✅ ${totSudah} Sudah / ❌ ${totBelum} Belum*\n`;
+
+  // Kelompokkan unit per Lokasi -> Pihak Penyewa -> Tipe, dipisah antara
+  // yang SUDAH dan yang BELUM P2H — dua struktur terpisah supaya urutan
+  // tampil bisa: Sudah dulu, baru Belum.
+  const groupsSudah = {}, groupsBelum = {};
+  order.forEach(t => {
+    filteredUnitsByType[t].forEach(u => {
+      const { lokasi, penyewa } = getUnitLokasiPenyewa(u);
+      const lok = lokasi && lokasi !== '-' ? lokasi : 'Lokasi Belum Diketahui';
+      const pen = penyewa && penyewa !== '-' ? penyewa : 'Pihak Belum Diketahui';
+      const bucket = submitted.has(u) ? groupsSudah : groupsBelum;
+      if (!bucket[lok]) bucket[lok] = {};
+      if (!bucket[lok][pen]) bucket[lok][pen] = {};
+      if (!bucket[lok][pen][t]) bucket[lok][pen][t] = [];
+      bucket[lok][pen][t].push(u);
+    });
+  });
+
+  const renderGroupBlock = (groups) => {
+    let out = '';
+    Object.keys(groups).sort().forEach(lok => {
+      out += `\n📍 *${lok}*\n`;
+      Object.keys(groups[lok]).sort().forEach(pen => {
+        out += `  *${pen}:*\n`;
+        order.filter(t => groups[lok][pen][t] && groups[lok][pen][t].length).forEach(t => {
+          const items = groups[lok][pen][t].map(u => {
+            const nama = nameMap.get(u);
+            return nama ? `${u} (${nama})` : u;
+          });
+          out += `   • *${unitLabel[t]}:*\n`;
+          items.forEach((item, i) => { out += `   ${i + 1}. ${item}\n`; });
+        });
+      });
+    });
+    return out;
+  };
+
+  if (Object.keys(groupsSudah).length > 0) {
+    text += `\n*✅ Sudah P2H:*\n` + renderGroupBlock(groupsSudah);
+  }
+  if (Object.keys(groupsBelum).length > 0) {
+    text += `\n*❌ Unit Belum P2H:*\n` + renderGroupBlock(groupsBelum);
+  } else {
+    text += `\nSemua unit sudah P2H hari ini ✅`;
+  }
+
+  return text.trim();
+}
+
+function openChatPenyewaModal() {
+  const m = document.getElementById('chatPenyewaModal');
+  if (m) m.classList.add('show');
+}
+function closeChatPenyewaModal() {
+  const m = document.getElementById('chatPenyewaModal');
+  if (m) m.classList.remove('show');
+}
+function copyRekapForSelectedPenyewa() {
+  const sel = document.getElementById('chatPenyewaSelect');
+  const tipeSel = document.getElementById('chatTipeSelect');
+  const groupKey = sel ? sel.value : '';
+  const tipeKey = tipeSel ? tipeSel.value : 'all';
+  closeChatPenyewaModal();
+  copyRekapChatText(groupKey, tipeKey);
+}
+
+function copyRekapChatText(groupKey, tipeKey) {
+  const text = buildRekapChatText(groupKey, tipeKey);
+  if (!text) { toast('⚠ Pihak penyewa tidak valid', 'err'); return; }
+
+  const fallbackCopy = () => {
+    // Fallback untuk browser/WebView lama yang belum dukung navigator.clipboard
+    // (mis. beberapa WebView Android in-app) atau konteks bukan HTTPS.
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) toast('✅ Rekap disalin, tempel di WA', 'ok');
+      else toast('⚠ Gagal menyalin, coba lagi', 'err');
+    } catch (e) {
+      toast('⚠ Gagal menyalin, coba lagi', 'err');
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => toast('✅ Rekap disalin, tempel di WA', 'ok'))
+      .catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3698,7 +3893,11 @@ function emptyStateHtml(msg) {
 async function fetchApprovalList() {
   const area = document.getElementById('approveListArea');
   if (!area) return;
-  if (!GAS_URL) { area.innerHTML = emptyStateHtml('⚠ URL GAS belum diset'); return; }
+  if (!GAS_URL) {
+    _approveListLastError = 'URL GAS belum diset';
+    area.innerHTML = emptyStateHtml('⚠ URL GAS belum diset');
+    return;
+  }
   try {
     const res = await fetch(GAS_URL + '?action=getApprovalList&role=' + encodeURIComponent(approverAuth.jabatan), {
       method: 'GET', redirect: 'follow'
@@ -3706,10 +3905,16 @@ async function fetchApprovalList() {
     const text = await res.text();
     let json;
     try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
-    if (json.status !== 'ok') { area.innerHTML = emptyStateHtml('❌ ' + (json.message || 'Gagal memuat data')); return; }
+    if (json.status !== 'ok') {
+      _approveListLastError = json.message || 'Gagal memuat data';
+      area.innerHTML = emptyStateHtml('❌ ' + _approveListLastError);
+      if (_approveTab === 'rekap') renderApproveRekap();
+      return;
+    }
     _approveList = json.list || [];
     _approvedTodayList = json.approvedToday || [];
     _approveListLoaded = true;
+    _approveListLastError = null;
     updateApproveBadge();
     updateApproveTabCount();
     // FIX BUG — dulu selalu renderApproveList() di sini, jadi kalau user
@@ -3721,7 +3926,9 @@ async function fetchApprovalList() {
     if (_approveTab === 'pending') renderApproveList();
     else if (_approveTab === 'rekap') renderApproveRekap();
   } catch (e) {
+    _approveListLastError = e.message;
     area.innerHTML = emptyStateHtml('❌ ' + e.message);
+    if (_approveTab === 'rekap') renderApproveRekap();
   }
 }
 
