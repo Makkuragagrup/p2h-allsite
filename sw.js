@@ -56,9 +56,16 @@ function swUpdateRecord(db, localId, updates) {
 }
 function buildPayloadSW(rec) {
   const cfg = FORMS_META[rec.unitType] || {};
+  // Samakan dengan guard di index.html buildPayload() — P2H ID tidak boleh
+  // kosong. Kalau kejadian, itu bug (record dari sebelum field ini ada /
+  // korup), dan tanpa guard ini server bakal generate ID acaknya sendiri
+  // tanpa jejak yang bisa dicocokkan balik ke record lokal.
+  if (!rec['P2H ID']) {
+    console.warn('[BGSync][buildPayloadSW] P2H ID kosong untuk localId=' + rec.localId);
+  }
   const row = {
     sheetName: rec.sheetName,
-    'P2H ID': rec['P2H ID'] || '',
+    'P2H ID': rec['P2H ID'] || `P2H-${rec['ID Unit'] || 'UNIT'}-FALLBACK-${rec.localId}`,
     'Tanggal P2H': rec.tanggalInput || rec.tanggal,
     'Jam Pengisian P2H': rec.jam,
     [cfg.namaField]: rec[cfg.namaField],
@@ -110,10 +117,16 @@ async function syncPendingRecords() {
       try { json = JSON.parse(text); } catch (e) { json = { status: 'error', message: 'Response bukan JSON valid' }; }
 
       if (json.status === 'ok') {
-        await swUpdateRecord(db, rec.localId, {
+        const swUpdates = {
           status: 'synced', syncedAt: new Date().toISOString(),
           errorMsg: '', retryCount: 0, nextRetryAt: null
-        });
+        };
+        // Sama seperti index.html: selaraskan ID lokal kalau server pakai
+        // ID yang beda dari yang dikirim (fallback generateId() di server).
+        if (json.p2hId && json.p2hId !== rec['P2H ID']) {
+          swUpdates['P2H ID'] = json.p2hId;
+        }
+        await swUpdateRecord(db, rec.localId, swUpdates);
       } else {
         const retryCount = (rec.retryCount || 0) + 1;
         const delayMs = RETRY_DELAYS_MS[Math.min(retryCount - 1, RETRY_DELAYS_MS.length - 1)];
@@ -135,7 +148,7 @@ async function syncPendingRecords() {
   }
 }
 
-const CACHE_NAME = 'p2h-shell-v12'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+const CACHE_NAME = 'p2h-shell-v13'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
 const APP_SHELL = [
   './',
   './index.html',

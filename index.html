@@ -2824,10 +2824,19 @@ async function retrySingleCore(rec, localId) {
     // FIX 2: jangan percaya res.ok sebagai sinyal sukses — GAS bisa balas
     // HTTP 200 dengan body {status:'error'} saat ada exception di backend.
     if (json.status === 'ok') {
-      await dbUpdate('records', localId, {
+      const updates = {
         status: 'synced', syncedAt: new Date().toISOString(),
         errorMsg: '', retryCount: 0, nextRetryAt: null
-      });
+      };
+      // FIX RECONCILE: kalau server terpaksa generate P2H ID sendiri (karena
+      // yang dikirim client kosong/hilang), ID lokal yang tersimpan di
+      // IndexedDB TIDAK PERNAH match dengan ID yang beneran ada di sheet —
+      // Riwayat jadi menampilkan ID yang tidak ada gunanya untuk dicari di
+      // spreadsheet. Selaraskan begitu server bilang ID-nya beda.
+      if (json.p2hId && json.p2hId !== rec['P2H ID']) {
+        updates['P2H ID'] = json.p2hId;
+      }
+      await dbUpdate('records', localId, updates);
       toast('✅ Berhasil tersync!', 'ok');
     } else {
       const retryCount = (rec.retryCount || 0) + 1;
@@ -2916,13 +2925,19 @@ async function syncAll() {
       // FIX 2: jangan percaya res.ok sebagai sinyal sukses — GAS bisa balas
       // HTTP 200 dengan body {status:'error'} saat ada exception di backend.
       if (json.status === 'ok') {
-        await dbUpdate('records', rec.localId, {
+        const updates = {
           status: 'synced',
           syncedAt: new Date().toISOString(),
           errorMsg: '',
           retryCount: 0,
           nextRetryAt: null
-        });
+        };
+        // Selaraskan P2H ID lokal kalau server pakai ID yang beda (lihat
+        // catatan FIX RECONCILE di retrySingleCore).
+        if (json.p2hId && json.p2hId !== rec['P2H ID']) {
+          updates['P2H ID'] = json.p2hId;
+        }
+        await dbUpdate('records', rec.localId, updates);
         success++;
       } else {
         // FIX 2: Hitung nextRetryAt berdasarkan retryCount
@@ -2962,9 +2977,18 @@ async function syncAll() {
 
 function buildPayload(rec) {
   const cfg = FORMS[rec.unitType];
+  // FIX GUARD: P2H ID seharusnya SELALU sudah diisi sejak submitForm()
+  // (generateP2HId dipanggil sebelum dbPut). Kalau ternyata kosong di sini
+  // (record lama/legacy, atau migrasi data), itu SINYAL BUG — jangan diam-diam
+  // biarkan server generate ID acaknya sendiri (itu penyebab kasus "P2H ID
+  // di app beda dengan yang di sheet"). Log supaya kelihatan di console kalau
+  // ini kejadian, dan tetap kirim ID yang valid format-nya.
+  if (!rec['P2H ID']) {
+    console.warn('[buildPayload] P2H ID kosong untuk localId=' + rec.localId + ' — regenerasi fallback. Cek kenapa record ini tidak punya P2H ID sejak awal.');
+  }
   const row = {
     sheetName: rec.sheetName,
-    'P2H ID': rec['P2H ID'] || '',
+    'P2H ID': rec['P2H ID'] || `P2H-${rec['ID Unit'] || 'UNIT'}-FALLBACK-${rec.localId}`,
     'Tanggal P2H': rec.tanggalInput || rec.tanggal,
     'Jam Pengisian P2H': rec.jam,
     [cfg.namaField]: rec[cfg.namaField],
