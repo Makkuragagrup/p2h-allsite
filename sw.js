@@ -148,7 +148,7 @@ async function syncPendingRecords() {
   }
 }
 
-const CACHE_NAME = 'p2h-shell-v13'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+const CACHE_NAME = 'p2h-shell-v15'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
 const APP_SHELL = [
   './',
   './index.html',
