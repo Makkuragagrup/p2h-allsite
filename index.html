@@ -1498,7 +1498,8 @@ function applyMasterUnit(units, lokasi, penyewa, passwords, unitMeta) {
   // Tanpa ini, tombol refresh/sync kelihatan "tidak ngefek" selama masih di
   // dalam form — padahal datanya sudah ke-update, cuma select-nya belum di-render ulang.
   if (currentForm && document.getElementById('page-form').classList.contains('active')) {
-    _unitOptions = UNIT_OPTIONS[currentForm] || [];
+    const fLokasiValNow = document.getElementById('f_lokasi') ? document.getElementById('f_lokasi').value : '';
+    _unitOptions = getUnitOptionsForTypeLokasi(currentForm, fLokasiValNow);
     renderUnitList(document.getElementById('f_unit_search') ? document.getElementById('f_unit_search').value : '');
 
     const fLokasiSel  = document.getElementById('f_lokasi');
@@ -2158,7 +2159,7 @@ function _openForm(type) {
     </div>
     <div class="form-field">
       <label>Lokasi Site</label>
-      <select id="f_lokasi">
+      <select id="f_lokasi" onchange="onLokasiChangeInForm()">
         <option value="">-- Pilih Lokasi Site --</option>
         ${LOKASI_OPTIONS.map(l => `<option value="${l}"${settings.defLokasi === l ? ' selected' : ''}>${l}</option>`).join('')}
       </select>
@@ -2308,8 +2309,46 @@ let _unitDropdownOpen = false;
 let _closeDropdownTimer = null;
 
 function initUnitSearch(type) {
-  _unitOptions = UNIT_OPTIONS[type] || [];
+  const lokasiSel = document.getElementById('f_lokasi');
+  _unitOptions = getUnitOptionsForTypeLokasi(type, lokasiSel ? lokasiSel.value : '');
   renderUnitList('');
+}
+
+// Saring UNIT_OPTIONS[type] sesuai Lokasi Site yang dipilih, berdasarkan
+// UNIT_META (kolom D sheet "Master Unit"). Unit yang datanya belum ada di
+// UNIT_META (belum pernah sync / Code.gs versi lama) TETAP ditampilkan —
+// supaya filter site tidak diam-diam menyembunyikan unit yang valid hanya
+// karena metadatanya belum lengkap. Kalau Lokasi Site belum dipilih, tampilkan semua.
+function getUnitOptionsForTypeLokasi(type, lokasi) {
+  const all = UNIT_OPTIONS[type] || [];
+  if (!lokasi) return all;
+  const lok = normLokasi(lokasi);
+  return all.filter(u => {
+    const meta = UNIT_META[u];
+    if (!meta || !meta.lokasi) return true;
+    return normLokasi(meta.lokasi) === lok;
+  });
+}
+
+// Dipanggil saat operator ganti Lokasi Site di form (setelah ID Unit sudah
+// mulai diisi). Re-filter daftar ID Unit sesuai lokasi baru, dan kosongkan
+// ID Unit yang sudah dipilih kalau ternyata bukan milik lokasi baru itu —
+// supaya tidak kebawa submit unit yang salah site.
+function onLokasiChangeInForm() {
+  const lokasiSel = document.getElementById('f_lokasi');
+  const lokasi = lokasiSel ? lokasiSel.value : '';
+  _unitOptions = getUnitOptionsForTypeLokasi(currentForm, lokasi);
+
+  const hidden = document.getElementById('f_unit');
+  if (hidden && hidden.value && !_unitOptions.includes(hidden.value)) {
+    hidden.value = '';
+    const search = document.getElementById('f_unit_search');
+    if (search) search.value = '';
+    const clear = document.getElementById('unitSearchClear');
+    if (clear) clear.style.display = 'none';
+    toast('⚠ ID unit dikosongkan, tidak terdaftar di lokasi site ini', 'err');
+  }
+  renderUnitList(document.getElementById('f_unit_search') ? document.getElementById('f_unit_search').value : '');
 }
 
 function renderUnitList(query) {

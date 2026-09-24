@@ -148,7 +148,8 @@ async function syncPendingRecords() {
   }
 }
 
-const CACHE_NAME = 'p2h-shell-v17'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+const CACHE_NAME = 'p2h-shell-v18'; // naikkan versi ini tiap kali index.html di-update & ingin paksa refresh cache
+// v18: index.html — filter ID Unit ikut Lokasi Site yang dipilih (UNIT_META)
 // FIX 10 (lihat index.html): dinaikkan supaya device yang sudah lama buka app
 // dengan SW versi lama (sebelum ada trySWUpdateCheck()) langsung dianggap
 // perlu update begitu kesempatan cek update pertama kali ke-trigger.
